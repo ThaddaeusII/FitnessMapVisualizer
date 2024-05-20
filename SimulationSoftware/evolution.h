@@ -10,12 +10,17 @@ const int MAX_GENE_SIZE = 100;
 
 struct Organism
 {
-  int x;
-  int y;
-  double fit;
+  int x; // X gene value
+  int y; // Y gene value
+  double fit; // Fitness value
 
+  // Constructor
   Organism(int x, int y);
+
+  // Function to set fitness from fitness function 
   void getFitness(emp::array<emp::array<double, MAX_GENE_SIZE>, MAX_GENE_SIZE> &fitness_map);
+
+  // Function to mutate position in a given direction
   void mutate(int dir, int xlim, int ylim);
 };
 
@@ -39,7 +44,7 @@ struct Population
   Population(int n = 10000,
              double m = 0.01,
              std::string directory = "./",
-             std::string fitness = "./fitness_test.map");
+             std::string fitness = "./FitnessMaps/fitness_test.map");
   ~Population();
 
   // Main simulation
