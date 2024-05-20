@@ -1,9 +1,6 @@
 #include "evolution.h"
-#include <algorithm>
 #include <iostream>
 #include <fstream>
-#include <random>
-#include <string>
 
 /*
  * Constructor for organism
@@ -21,13 +18,8 @@ Organism::Organism(int x, int y)
  * Arguments: None
  * Returns: Nothing
  */
-void Organism::getFitness(double ** fitness_map)
+void Organism::getFitness(emp::array<emp::array<double, MAX_GENE_SIZE>, MAX_GENE_SIZE> &fitness_map)
 {
-  if (fitness_map == NULL)
-  {
-    std::cout << "Fitness map not set!" << std::endl;
-    return;
-  }
   fit = fitness_map[y][x];
 }
 
@@ -73,20 +65,15 @@ Population::Population(int n, double m, std::string directory, std::string fitne
   this->m = m; // Mutation chance (would be cool if it changed)
   this->directory = directory.append("gen_"); // File path to save to, gen_#, # is determined later
   gen = 0; // Generation number, starts at 0
-  fitness_map = new double*[MAX_GENE_SIZE];
+  
+  // Initialize fitness map to all 0s
   for (int i = 0; i < MAX_GENE_SIZE; ++i)
-    fitness_map[i] = new double[MAX_GENE_SIZE];
-
-  // Initialize random distributions
-  std::random_device rd;
-  mt.seed(rd());
-  ud_dir = std::uniform_int_distribution<int>(0, 3); // What direction for mutation
-  ud_par = std::uniform_int_distribution<int>(0, n - 1); // Select parent to check
-  ud_real = std::uniform_real_distribution<double>(0.0, 1.0); // Probability of offspring based on fitness
+    for (int j = 0; j < MAX_GENE_SIZE; ++j)
+      fitness_map[i][j] = 0;
 
   // Load fitness function
   loadFitnessFunction(fitness);
-  
+
   // Initialize population at center of current genetic map
   for (int i = 0; i < n; ++i)
   {
@@ -97,15 +84,12 @@ Population::Population(int n, double m, std::string directory, std::string fitne
 }
 
 /*
- * Deconstructor for Population, gets rid of fitness map array
+ * Deconstructor for Population, currently no changes
  * Arguments: None
  * Returns: Nothing
  */
 Population::~Population()
 {
-  for (int i = 0; i < ylim; ++i)
-    delete[] fitness_map[i];
-  delete[] fitness_map;
 }
 
 /*
@@ -115,10 +99,10 @@ Population::~Population()
  */
 void Population::evolve(int generations, int tournament_size, bool save)
 {
-  // Ensure that there is a fitness function and population
-  if (fitness_map == NULL || pop.size() == 0)
+  // Ensure that there is a population
+  if (pop.size() == 0)
   {
-    std::cout << "Cannot evolve with an empty population or no fitness map" << std::endl;
+    std::cout << "Cannot evolve with an empty population" << std::endl;
     return;
   }
 
@@ -165,10 +149,10 @@ void Population::selectionTournament(int t)
   for (int i = 0; i < n; ++i)
   {
     // Parent selection process, select t organisms for tournament
-    int max_parent = random_par();
+    int max_parent = rng.GetInt(0, n);
     for (int i = 0; i < t - 1; ++i)
     {
-      int parent = random_par();
+      int parent = rng.GetInt(0, n);
       max_parent = (pop[parent].fit > pop[max_parent].fit) ? parent : max_parent;
     }
 
@@ -176,9 +160,8 @@ void Population::selectionTournament(int t)
     Organism o(pop[max_parent].x, pop[max_parent].y);
 
     // Check if there's a mutation
-    double mutation_check = random_real();
-    if (mutation_check < m)
-      o.mutate(random_dir(), xlim, ylim);
+    if (rng.P(m))
+      o.mutate(rng.GetInt(0, 4), xlim, ylim);
 
     // Get organism's fitness
     o.getFitness(fitness_map);
@@ -189,36 +172,6 @@ void Population::selectionTournament(int t)
 
   // Change to new population
   pop = new_pop;
-}
-
-/*
- * Function to get a random direction.
- * Arguments: None
- * Returns: Random number in {0,1,2,3}
- */ 
-int Population::random_dir()
-{
-  return ud_dir(mt);
-}
-
-/*
- * Function to select a random parent
- * Arguments: None
- * Returns: Number in range [0, N]
- */ 
-int Population::random_par()
-{
-  return ud_par(mt);
-}
-
-/*
- * Function to get a random chance
- * Arguments: None
- * Returns: Decimal in range [0.0, 1.0]
- */ 
-double Population::random_real()
-{
-  return ud_real(mt);
 }
 
 /*

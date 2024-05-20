@@ -5,12 +5,13 @@ import sys
 populations = []
 times = []
 
-if len(sys.argv) != 3:
+if len(sys.argv) != 4:
     print("Invalid arguments!")
     exit()
 
-filename = sys.argv[1]
-savefile = sys.argv[2]
+filename1 = sys.argv[1]
+filename2 = sys.argv[2]
+savefile = sys.argv[3]
 
 # Function to read population vs time from benchmark.cpp save file
 def readFile(filename):
@@ -31,11 +32,17 @@ plt.title("Population vs Time")
 plt.xlabel("Population")
 plt.ylabel("Time")
 
-# Get data from file
-readFile(filename)
+# Get data from 1st file
+readFile(filename1)
 
 # Plot data
 plt.plot(populations, times, color='b')
+
+# Get data from file 2
+readFile(filename2)
+
+# Plot data
+plt.plot(populations, times, color='r')
 
 # Save figure
 plt.savefig(savefile)

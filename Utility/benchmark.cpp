@@ -1,4 +1,4 @@
-#include "./SimulationSoftware/evolution.h"
+#include "evolution.h"
 #include <chrono>
 #include <iostream>
 #include <numeric>
@@ -14,7 +14,7 @@ const int DEFAULT_POPULATION_SIZE = 10000;
 const double DEFAULT_MUTATION_RATE = 0.01;
 const int DEFAULT_GENERATIONS = 1000;
 const int DEFAULT_TOURNAMENT_SIZE = 7;
-const std::string DEFAULT_FITNESS_MAP = "./fitness_test.map";
+const std::string DEFAULT_FITNESS_MAP = "./FitnessMaps/fitness_test.map";
 
 template <typename T>
 void SaveResults(std::vector<T> * vec, std::vector<double> * times, std::string filename)
