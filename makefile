@@ -4,7 +4,8 @@ CXX = g++
 # Flags
 CXXFLAGS = -O3 -std=c++20
 
-INCLUDES = -I ./SimulationSoftware/
+INCLUDES = -I ./SimulationSoftware/ \
+					 -I ../Empirical/include/
 
 all: bench ftest
 

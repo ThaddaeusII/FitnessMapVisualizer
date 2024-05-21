@@ -1,12 +1,12 @@
 #ifndef EVOLUTION_H
 #define EVOLUTION_H
 
-#include "emp/base/vector.hpp"
 #include "emp/base/array.hpp"
 #include "emp/math/Random.hpp"
 #include <string>
 
-const int MAX_GENE_SIZE = 100;
+constexpr int MAX_GENE_SIZE = 100;
+constexpr int MAX_POP_SIZE = 10000;
 
 struct Organism
 {
@@ -14,7 +14,8 @@ struct Organism
   int y; // Y gene value
   double fit; // Fitness value
 
-  // Constructor
+  // Constructors
+  Organism();
   Organism(int x, int y);
 
   // Function to set fitness from fitness function 
@@ -37,15 +38,16 @@ struct Population
   emp::Random rng;
   
   // Organism and fitness value storage
-  emp::vector<Organism> pop;
+  bool first_pop; // Using pop1 if true, else pop2 is current
+  emp::array<Organism, MAX_POP_SIZE> pop1;
+  emp::array<Organism, MAX_POP_SIZE> pop2;
   emp::array<emp::array<double, MAX_GENE_SIZE>, MAX_GENE_SIZE> fitness_map;
 
-  // Population construction and destruction
+  // Population constructor
   Population(int n = 10000,
              double m = 0.01,
              std::string directory = "./",
              std::string fitness = "./FitnessMaps/fitness_test.map");
-  ~Population();
 
   // Main simulation
   void evolve(int generations = 100,

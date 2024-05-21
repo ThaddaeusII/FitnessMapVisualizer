@@ -3,14 +3,21 @@
 #include <fstream>
 
 /*
- * Constructor for organism
+ * Default constructor for organism
+ * Arguments: None
+ * Returns: Organism
+ */
+Organism::Organism() : x(0), y(0), fit(0.0)
+{
+}
+
+/*
+ * Constructor for organism if coordinates known
  * Arguments: x gene, y gene
  * Returns: Organism
  */
-Organism::Organism(int x, int y)
-{
-  this->x = x;
-  this->y = y;
+Organism::Organism(int x, int y) : x(x), y(y), fit(0.0)
+{ 
 }
 
 /*
@@ -59,10 +66,15 @@ void Organism::mutate(int dir, int xlim, int ylim)
  *            and fitness map file to load from
  * Returns: Population
  */
-Population::Population(int n, double m, std::string directory, std::string fitness)
+Population::Population(int n, double m, std::string directory, std::string fitness) : n(n), m(m)
 {
-  this->n = n; // Population count (maybe keep record of inital?)
-  this->m = m; // Mutation chance (would be cool if it changed)
+  if (n > MAX_POP_SIZE)
+  {
+    this->n = MAX_POP_SIZE;
+    n = MAX_POP_SIZE;
+    std::cout << "Population size exceeds limit, limiting to " << MAX_POP_SIZE << "!" << std::endl;
+  }
+
   this->directory = directory.append("gen_"); // File path to save to, gen_#, # is determined later
   gen = 0; // Generation number, starts at 0
   
@@ -75,21 +87,13 @@ Population::Population(int n, double m, std::string directory, std::string fitne
   loadFitnessFunction(fitness);
 
   // Initialize population at center of current genetic map
+  first_pop = true;
   for (int i = 0; i < n; ++i)
   {
-    Organism o(xlim / 2, ylim / 2);
-    o.getFitness(fitness_map);
-    pop.push_back(o);
+    pop1[i].x = xlim / 2;
+    pop1[i].y = ylim / 2;
+    pop1[i].getFitness(fitness_map);
   }
-}
-
-/*
- * Deconstructor for Population, currently no changes
- * Arguments: None
- * Returns: Nothing
- */
-Population::~Population()
-{
 }
 
 /*
@@ -100,7 +104,7 @@ Population::~Population()
 void Population::evolve(int generations, int tournament_size, bool save)
 {
   // Ensure that there is a population
-  if (pop.size() == 0)
+  if (n == 0)
   {
     std::cout << "Cannot evolve with an empty population" << std::endl;
     return;
@@ -144,34 +148,57 @@ void Population::evolve(int generations, int tournament_size, bool save)
  */ 
 void Population::selectionTournament(int t)
 {
-  std::vector<Organism> new_pop; // Population of new generation
-
-  for (int i = 0; i < n; ++i)
+  if (first_pop)
   {
-    // Parent selection process, select t organisms for tournament
-    int max_parent = rng.GetInt(0, n);
-    for (int i = 0; i < t - 1; ++i)
+    for (int i = 0; i < n; ++i)
     {
-      int parent = rng.GetInt(0, n);
-      max_parent = (pop[parent].fit > pop[max_parent].fit) ? parent : max_parent;
+      // Parent selection process, select t organisms for tournament
+      int max_parent = rng.GetInt(0, n);
+      for (int i = 0; i < t - 1; ++i)
+      {
+        int parent = rng.GetInt(0, n);
+        max_parent = (pop1[parent].fit > pop1[max_parent].fit) ? parent : max_parent;
+      }
+
+      // Create child
+      pop2[i].x = pop1[max_parent].x;
+      pop2[i].y = pop1[max_parent].y;
+
+      // Check if there's a mutation
+      if (rng.P(m))
+        pop2[i].mutate(rng.GetInt(0, 4), xlim, ylim);
+    
+      // Get organism's fitness
+      pop2[i].getFitness(fitness_map);
     }
-
-    // Create new offspring at parent
-    Organism o(pop[max_parent].x, pop[max_parent].y);
-
-    // Check if there's a mutation
-    if (rng.P(m))
-      o.mutate(rng.GetInt(0, 4), xlim, ylim);
-
-    // Get organism's fitness
-    o.getFitness(fitness_map);
-
-    // Save to new population
-    new_pop.push_back(o);
   }
+  else // If current population is in pop2
+  {
+    for (int i = 0; i < n; ++i)
+    {
+      // Parent selection process, select t organisms for tournament
+      int max_parent = rng.GetInt(0, n);
+      for (int i = 0; i < t - 1; ++i)
+      {
+        int parent = rng.GetInt(0, n);
+        max_parent = (pop2[parent].fit > pop2[max_parent].fit) ? parent : max_parent;
+      }
 
-  // Change to new population
-  pop = new_pop;
+      // Create child
+      pop1[i].x = pop2[max_parent].x;
+      pop1[i].y = pop2[max_parent].y;
+
+      // Check if there's a mutation
+      if (rng.P(m))
+        pop1[i].mutate(rng.GetInt(0, 4), xlim, ylim);
+    
+      // Get organism's (new) fitness
+      pop1[i].getFitness(fitness_map);
+    }
+  }
+  
+  // Change to use other array
+  first_pop = !first_pop;
 }
 
 /*
@@ -187,8 +214,12 @@ void Population::savePopulation(std::string file)
   f << "M " << m << std::endl;
   f << "G " << gen << std::endl;
 
-  for (int i = 0; i < n; ++i)
-    f << pop[i].x << " " << pop[i].y << " " << pop[i].fit << std::endl;
+  if (first_pop)
+    for (int i = 0; i < n; ++i)
+      f << pop1[i].x << " " << pop1[i].y << " " << pop1[i].fit << std::endl;
+  else
+    for (int i = 0; i < n; ++i)
+      f << pop2[i].x << " " << pop2[i].y << " " << pop2[i].fit << std::endl;
 
   f.close();
 }
@@ -200,8 +231,6 @@ void Population::savePopulation(std::string file)
  */ 
 void Population::loadPopulation(std::string file)
 {
-  pop.clear();
-
   std::ifstream f(file);
 
   char temp;
@@ -209,18 +238,15 @@ void Population::loadPopulation(std::string file)
   f >> temp >> m;
   f >> temp >> gen;
 
-  for (int i = 0; i < n; ++i)
+  if (n > MAX_POP_SIZE)
   {
-    int x = 0;
-    int y = 0;
-    double fit = 0;
-    
-    f >> x >> y >> fit;
-    
-    Organism o(x, y);
-    o.fit = fit;
-    pop.push_back(o);
+    n = MAX_POP_SIZE;
+    std::cout << "Population size exceeds limit, limiting to " << MAX_POP_SIZE << "!" << std::endl;
   }
+
+  first_pop = true;
+  for (int i = 0; i < n; ++i)
+    f >> pop1[i].x >> pop1[i].y >> pop1[i].fit;
 
   f.close();
 }
