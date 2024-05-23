@@ -3,10 +3,11 @@
 
 #include "emp/base/array.hpp"
 #include "emp/math/Random.hpp"
+#include "emp/datastructs/IndexMap.hpp"
 #include <string>
 
 constexpr int MAX_GENE_SIZE = 100;
-constexpr int MAX_POP_SIZE = 10000;
+constexpr int MAX_POP_SIZE = 100000;
 
 struct Organism
 {
@@ -42,20 +43,25 @@ struct Population
   emp::array<Organism, MAX_POP_SIZE> pop1;
   emp::array<Organism, MAX_POP_SIZE> pop2;
   emp::array<emp::array<double, MAX_GENE_SIZE>, MAX_GENE_SIZE> fitness_map;
+  emp::IndexMap roulette_map;
 
   // Population constructor
   Population(int n = 10000,
              double m = 0.01,
              std::string directory = "./",
-             std::string fitness = "./FitnessMaps/fitness_test.map");
+             std::string fitness = "./FitnessMaps/fitness_test.map",
+             int xstart = -1,
+             int ystart = -1);
 
   // Main simulation
   void evolve(int generations = 100,
+              char selection = 't',
               int tournament_size = 7,
               bool save = false);
   
   // Parent selection methods
   void selectionTournament(int t);
+  void selectionRoulette();
 
   // File IO
   void savePopulation(std::string file);

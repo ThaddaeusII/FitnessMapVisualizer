@@ -15,8 +15,9 @@ int main(int argc, char* argv[])
   int tournament_size = atoi(argv[4]);
   std::string fitness_map(argv[5]);
 
-  Population p(population, mutation_rate, "./TestData/", fitness_map);
-  p.evolve(generations, tournament_size, true);
+  Population p(population, mutation_rate, "./TestData/", fitness_map, 0, 0);
+  p.evolve(generations, 't', tournament_size, false);
+  p.savePopulation("./fitness_test_results.txt");
 
   return 0;
 }

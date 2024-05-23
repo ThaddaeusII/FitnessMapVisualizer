@@ -1,6 +1,7 @@
 #include "evolution.h"
 #include <iostream>
 #include <fstream>
+#include "emp/datastructs/IndexMap.hpp"
 
 /*
  * Default constructor for organism
@@ -66,7 +67,7 @@ void Organism::mutate(int dir, int xlim, int ylim)
  *            and fitness map file to load from
  * Returns: Population
  */
-Population::Population(int n, double m, std::string directory, std::string fitness) : n(n), m(m)
+Population::Population(int n, double m, std::string directory, std::string fitness, int xstart, int ystart) : n(n), m(m)
 {
   if (n > MAX_POP_SIZE)
   {
@@ -86,22 +87,31 @@ Population::Population(int n, double m, std::string directory, std::string fitne
   // Load fitness function
   loadFitnessFunction(fitness);
 
+  // Adjust xstart and ystart if necessary
+  if (xstart == -1)
+    xstart = xlim / 2;
+  if (ystart == -1)
+    ystart = ylim / 2;
+  
   // Initialize population at center of current genetic map
   first_pop = true;
   for (int i = 0; i < n; ++i)
   {
-    pop1[i].x = xlim / 2;
-    pop1[i].y = ylim / 2;
+    pop1[i].x = xstart;
+    pop1[i].y = ystart;
     pop1[i].getFitness(fitness_map);
   }
+
+  // Initialize roulette map with size n
+  roulette_map = emp::IndexMap(n);
 }
 
 /*
  * Function that will simulate generations of a population
- * Arguments: How many generations, tournament size to be used, and flag for saving
+ * Arguments: How many generations, flag for selection method, tournament size to be used, and flag for saving
  * Returns: Nothing
  */
-void Population::evolve(int generations, int tournament_size, bool save)
+void Population::evolve(int generations, char selection, int tournament_size, bool save)
 {
   // Ensure that there is a population
   if (n == 0)
@@ -125,7 +135,17 @@ void Population::evolve(int generations, int tournament_size, bool save)
     ++gen;
 
     // Create children based on fitness, track mutations
-    selectionTournament(tournament_size);
+    switch(selection)
+    {
+    case 't':
+      selectionTournament(tournament_size);
+      break;
+    case 'r':
+      selectionRoulette();
+      break;
+    default:
+      selectionTournament(7);
+    }
     
     //if ((i + 1) % 100 == 0)
     //{
@@ -202,6 +222,81 @@ void Population::selectionTournament(int t)
 }
 
 /*
+ * Function to perform roulette selection
+ * Arguments: None
+ * Returns: Nothing
+ */
+void Population::selectionRoulette()
+{
+  // Determine if pop1 or pop2 has current population
+  if (first_pop)
+  {
+    // Calculate the index map (would it be faster to make a vector and adjustall or adjust n times?)
+    for (int i = 0; i < n; ++i)
+      roulette_map[i] = pop1[i].fit;
+
+    // Ensure population isn't dead
+    if (roulette_map.GetWeight() == 0)
+    {
+      std::cout << "Population is dead, can't evolve!" << std::endl;
+      return;
+    }
+
+    // Select parents
+    for (int i = 0; i < n; ++i)
+    {
+      // Select random parent via roulette style
+      int parent = roulette_map.Index(rng.GetDouble(0, roulette_map.GetWeight())); // Does this do what I expect?
+
+      // Create child
+      pop2[i].x = pop1[parent].x;
+      pop2[i].y = pop1[parent].y;
+
+      // Check if there's a mutation
+      if (rng.P(m))
+        pop2[i].mutate(rng.GetInt(0, 4), xlim, ylim);
+    
+      // Get organism's (new) fitness
+      pop2[i].getFitness(fitness_map);
+    }
+  }
+  else
+  {
+    // Calculate the index map (would it be faster to make a vector and adjustall or adjust n times?)
+    for (int i = 0; i < n; ++i)
+      roulette_map[i] = pop2[i].fit;
+
+    // Ensure population isn't dead
+    if (roulette_map.GetWeight() == 0)
+    {
+      std::cout << "Population is dead, can't evolve!" << std::endl;
+      return;
+    }
+
+    // Select parents
+    for (int i = 0; i < n; ++i)
+    {
+      // Select random parent via roulette style
+      int parent = roulette_map.Index(rng.GetDouble(0, roulette_map.GetWeight())); // Does this do what I expect?
+
+      // Create child
+      pop1[i].x = pop2[parent].x;
+      pop1[i].y = pop2[parent].y;
+
+      // Check if there's a mutation
+      if (rng.P(m))
+        pop1[i].mutate(rng.GetInt(0, 4), xlim, ylim);
+    
+      // Get organism's (new) fitness
+      pop1[i].getFitness(fitness_map);
+    }
+  }
+
+  // Swap which array is active
+  first_pop = !first_pop;
+}
+
+/*
  * Function to save a Population to file
  * Arguments: Filepath/name to save to
  * Returns: Nothing
@@ -261,7 +356,7 @@ void Population::loadFitnessFunction(std::string file)
   std::ifstream f(file);
 
   // Get fitness map size
-  int maxfit;
+  double maxfit;
   double fitspace;
   f >> xlim >> ylim >> maxfit >> fitspace;
 
@@ -269,6 +364,8 @@ void Population::loadFitnessFunction(std::string file)
   if (xlim > MAX_GENE_SIZE || ylim > MAX_GENE_SIZE)
   {
     std::cout << "Fitness map exceeds maximum allowed size!" << std::endl;
+    std::cout << xlim << " || " << ylim << " > " << MAX_GENE_SIZE << std::endl;
+    std::cout << "From: " << file << std::endl;
     return;
   }
 

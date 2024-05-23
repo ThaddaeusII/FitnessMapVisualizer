@@ -17,21 +17,23 @@ if len(sys.argv) == 4:
 
 # Change this to get maps
 def fitness_function(x, y):
-    #xpos = (x - xsize / 2)**2
-    #ypos = (y - ysize / 2)**2
-    #if (xpos + ypos > 9 and xpos + ypos < 25):
-    #    return 1
-    return 1 if (x + y == 0) else 0
+    cval = (x - 50)**2 + (y - 50)**2
+    if cval >= 400 and cval <= 900:
+        return 10
+    return 1
 
 fitness_map = []
+max_val = 0.0
 for i in range(ysize):
     row = []
     for j in range(xsize):
         row.append(fitness_function(i, j))
+        if max_val < fitness_function(i, j):
+            max_val = float(fitness_function(i, j))
     fitness_map.append(row)
 
 with open(filename, 'w') as file:
-    file.write(f"{xsize} {ysize} 5 1\n")
+    file.write(f"{xsize} {ysize} {max_val} {max_val / 10.0}\n")
     for i in range(ysize):
         for j in range(xsize):
             file.write(f"{fitness_map[i][j]} ")

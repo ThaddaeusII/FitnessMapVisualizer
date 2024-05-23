@@ -14,19 +14,17 @@ maxfit = 1
 fitspace = 0.1
 jitter = 0.2
 
-if len(sys.argv) != 8:
+if len(sys.argv) != 6:
     print("Invalid Number of Arguments")
     exit()
 
-loaddirectory = sys.argv[1]
+loadfile = sys.argv[1]
 savefile = sys.argv[2]
 xlower = 0
 xupper = int(sys.argv[3])
 ylower = 0
 yupper = int(sys.argv[4])
-generations = int(sys.argv[5])
-fps = int(sys.argv[6])
-fitnessfile = sys.argv[7]
+fitnessfile = sys.argv[5]
 
 def getFitness(filename):
     global x_fitness
@@ -110,32 +108,9 @@ contourf = ax.contourf(x_fitness, y_fitness, fitness, levels = lvls, cmap = 'vir
 cbar = plt.colorbar(contourf, ax=ax)
 cbar.set_label('Height')
 
-# Initial scatter
-filename = f"{loaddirectory}gen_0.txt"
-readFile(filename)
+# Create scatter from file
+readFile(loadfile)
 scat = ax.scatter(x_data, y_data, marker = 'o', color = 'r')
 
-# Update function for animated graph, loads each population from file
-def animate(frame):
-    global x_data
-    global y_data
-    filename = f"{loaddirectory}/gen_{frame + 1}.txt"
-    readFile(filename)
-    if (frame + 1) % 100 == 0:
-        print(f"Scatter plot frame {frame + 1} complete!")
-    scat.set_offsets(np.c_[x_data, y_data])
-    title.set_text(f"Generation={frame + 1}")
-
-# Create animation
-ani = FuncAnimation(fig, # Figure to animate on
-                    animate, # Function to select next frame
-                    repeat=True, # Repeat GIF
-                    frames=generations, # One frame per generation
-                    interval=50, # Doesn't matter, gets overwritten by PillowWriter
-                    blit = False) # No blit allowed, causes error with animation
-
-# Save as GIF
-writer = PillowWriter(fps=fps,
-                        metadata=dict(artist='Me'),
-                        bitrate=1800)
-ani.save(savefile, writer=writer)
+# Save plot
+plt.savefig(savefile)

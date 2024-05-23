@@ -14,6 +14,7 @@ const int DEFAULT_POPULATION_SIZE = 10000;
 const double DEFAULT_MUTATION_RATE = 0.01;
 const int DEFAULT_GENERATIONS = 1000;
 const int DEFAULT_TOURNAMENT_SIZE = 7;
+const char DEFAULT_SELECTION = 's';
 const std::string DEFAULT_FITNESS_MAP = "./FitnessMaps/fitness_test.map";
 
 template <typename T>
@@ -56,7 +57,7 @@ void TestPopulations(std::vector<int> * p, std::vector<double> * t)
       {
         auto start = std::chrono::high_resolution_clock::now();
         Population pop(p->at(i), DEFAULT_MUTATION_RATE, "./", DEFAULT_FITNESS_MAP);
-        pop.evolve(DEFAULT_GENERATIONS, DEFAULT_TOURNAMENT_SIZE);
+        pop.evolve(DEFAULT_GENERATIONS, DEFAULT_SELECTION, DEFAULT_TOURNAMENT_SIZE);
   
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
@@ -87,7 +88,7 @@ void TestGenerations(std::vector<int> * g, std::vector<double> * t)
       {
         auto start = std::chrono::high_resolution_clock::now();
         Population pop(DEFAULT_POPULATION_SIZE, DEFAULT_MUTATION_RATE, "./", DEFAULT_FITNESS_MAP);
-        pop.evolve(g->at(i), DEFAULT_TOURNAMENT_SIZE);
+        pop.evolve(g->at(i), DEFAULT_SELECTION, DEFAULT_TOURNAMENT_SIZE);
   
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
@@ -118,7 +119,7 @@ void TestTournamentSizes(std::vector<int> * s, std::vector<double> * t)
       {
         auto start = std::chrono::high_resolution_clock::now();
         Population pop(DEFAULT_POPULATION_SIZE, DEFAULT_MUTATION_RATE, "./", DEFAULT_FITNESS_MAP);
-        pop.evolve(DEFAULT_GENERATIONS, s->at(i));
+        pop.evolve(DEFAULT_GENERATIONS, DEFAULT_SELECTION, s->at(i));
   
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
@@ -149,7 +150,7 @@ void TestMutationRates(std::vector<double> * m, std::vector<double> * t)
       {
         auto start = std::chrono::high_resolution_clock::now();
         Population pop(DEFAULT_POPULATION_SIZE, m->at(i), "./", DEFAULT_FITNESS_MAP);
-        pop.evolve(DEFAULT_GENERATIONS, DEFAULT_TOURNAMENT_SIZE);
+        pop.evolve(DEFAULT_GENERATIONS, DEFAULT_SELECTION, DEFAULT_TOURNAMENT_SIZE);
   
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
@@ -164,7 +165,7 @@ void TestMutationRates(std::vector<double> * m, std::vector<double> * t)
   std::cout << std::endl;
 }
 
-void TestFitnessMapSizes(std::vector<std::string> * f, std::vector<double> * t)
+void TestFitnessMapSizes(std::vector<int> * f, std::vector<double> * t)
 {
   t->clear();
   t->resize(f->size());
@@ -173,14 +174,15 @@ void TestFitnessMapSizes(std::vector<std::string> * f, std::vector<double> * t)
 
   for (int i = 0; i < f->size(); ++i)
   {
+    std::string s = "./FitnessMaps/test_" + std::to_string(f->at(i)) + "x" + std::to_string(f->at(i)) + ".map";
     #pragma omp parallel
     {
       #pragma omp for
       for (int j = 0; j < TESTS; ++j)
       {
         auto start = std::chrono::high_resolution_clock::now();
-        Population pop(DEFAULT_POPULATION_SIZE, DEFAULT_MUTATION_RATE, "./", f->at(i));
-        pop.evolve(DEFAULT_GENERATIONS, DEFAULT_TOURNAMENT_SIZE);
+        Population pop(DEFAULT_POPULATION_SIZE, DEFAULT_MUTATION_RATE, "./", s);
+        pop.evolve(DEFAULT_GENERATIONS, DEFAULT_SELECTION, DEFAULT_TOURNAMENT_SIZE);
 
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
@@ -200,6 +202,7 @@ int main()
   // Times for each test
   std::vector<double> times;
 
+  /*
   // Population sizes to test
   std::vector<int> pop_sizes;
   for (int i = 0; i < 100; ++i)
@@ -243,6 +246,18 @@ int main()
   // Run tests
   TestMutationRates(&mutation_rates, &times);
   SaveResults(&mutation_rates, &times, "./BenchmarkData/mutation_results.txt");
+  */
+
+  // Fitness map sizes to test
+  std::vector<int> fitness_map_sizes;
+  for (int i = 0; i < 100; ++i)
+  {
+    fitness_map_sizes.push_back(i);
+  }
+
+  // Run tests
+  TestFitnessMapSizes(&fitness_map_sizes, &times);
+  SaveResults(&fitness_map_sizes, &times, "./BenchmarkData/fitness_map_results.txt");
 
   return 0;
 }
