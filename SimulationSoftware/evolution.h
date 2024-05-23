@@ -7,7 +7,7 @@
 #include <string>
 
 constexpr int MAX_GENE_SIZE = 100;
-constexpr int MAX_POP_SIZE = 100000;
+constexpr int MAX_POP_SIZE = 10000;
 
 struct Organism
 {
@@ -33,7 +33,6 @@ struct Population
   int gen; // Current generation number
   int xlim; // Max X gene value
   int ylim; // Max Y gene value
-  std::string directory; // What directory to save files to
   
   // Random number generator
   emp::Random rng;
@@ -48,16 +47,15 @@ struct Population
   // Population constructor
   Population(int n = 10000,
              double m = 0.01,
-             std::string directory = "./",
-             std::string fitness = "./FitnessMaps/fitness_test.map",
-             int xstart = -1,
-             int ystart = -1);
+             int xstart = 0,
+             int ystart = 0);
 
   // Main simulation
   void evolve(int generations = 100,
               char selection = 't',
               int tournament_size = 7,
-              bool save = false);
+              bool save_all = false,
+              std::string save_dir = "./TestData");
   
   // Parent selection methods
   void selectionTournament(int t);

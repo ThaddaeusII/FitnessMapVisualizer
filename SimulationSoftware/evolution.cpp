@@ -67,7 +67,7 @@ void Organism::mutate(int dir, int xlim, int ylim)
  *            and fitness map file to load from
  * Returns: Population
  */
-Population::Population(int n, double m, std::string directory, std::string fitness, int xstart, int ystart) : n(n), m(m)
+Population::Population(int n, double m, int xstart, int ystart) : n(n), m(m)
 {
   if (n > MAX_POP_SIZE)
   {
@@ -76,7 +76,6 @@ Population::Population(int n, double m, std::string directory, std::string fitne
     std::cout << "Population size exceeds limit, limiting to " << MAX_POP_SIZE << "!" << std::endl;
   }
 
-  this->directory = directory.append("gen_"); // File path to save to, gen_#, # is determined later
   gen = 0; // Generation number, starts at 0
   
   // Initialize fitness map to all 0s
@@ -84,8 +83,6 @@ Population::Population(int n, double m, std::string directory, std::string fitne
     for (int j = 0; j < MAX_GENE_SIZE; ++j)
       fitness_map[i][j] = 0;
 
-  // Load fitness function
-  loadFitnessFunction(fitness);
 
   // Adjust xstart and ystart if necessary
   if (xstart == -1)
@@ -111,8 +108,10 @@ Population::Population(int n, double m, std::string directory, std::string fitne
  * Arguments: How many generations, flag for selection method, tournament size to be used, and flag for saving
  * Returns: Nothing
  */
-void Population::evolve(int generations, char selection, int tournament_size, bool save)
+void Population::evolve(int generations, char selection, int tournament_size, bool save_all, std::string save_dir)
 {
+  std::string file_start = save_dir.append("gen_"); // File path to save to, gen_#, # is determined later
+  
   // Ensure that there is a population
   if (n == 0)
   {
@@ -123,9 +122,9 @@ void Population::evolve(int generations, char selection, int tournament_size, bo
   // Track generations
   // std::cout << "Generation " << gen << ", " << n << " organisms!" << std::endl;
   std::string file;
-  if (save)
+  if (save_all)
   {
-    file = directory + std::to_string(gen) + ".txt";
+    file = file_start + std::to_string(gen) + ".txt";
     savePopulation(file);
   }
 
@@ -153,9 +152,9 @@ void Population::evolve(int generations, char selection, int tournament_size, bo
     //}
 
     // Save current generation
-    if (save)
+    if (save_all)
     {
-      file = directory + std::to_string(gen) + ".txt";
+      file = file_start + std::to_string(gen) + ".txt";
       savePopulation(file);
     }
   }
@@ -375,6 +374,14 @@ void Population::loadFitnessFunction(std::string file)
       f >> fitness_map[i][j];
 
   f.close();
+
+  // Update current population fitness
+  if (first_pop)
+    for (int i = 0; i < n; ++i)
+      pop1[i].getFitness(fitness_map);
+  else
+    for (int i = 0; i < n; ++i)
+      pop2[i].getFitness(fitness_map);
 }
 
 /*

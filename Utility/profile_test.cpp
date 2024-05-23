@@ -2,7 +2,8 @@
 
 int main()
 {
-  Population p(100000, 0.01, "./", "./FitnessMaps/100x100_ring.map");
-  p.evolve(1000000, 's', 7);
+  Population p(10000, 0.2);
+  p.loadFitnessFunction("./FitnessMaps/100x100_raised_ring.map");
+  p.evolve(10000, 's', 7);
   return 0;
 }
