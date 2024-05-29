@@ -17,9 +17,10 @@ if len(sys.argv) == 4:
 
 # Change this to get maps
 def fitness_function(x, y):
-    cval = (x - 50)**2 + (y - 50)**2
-    if cval >= 400 and cval <= 900:
-        return 10
+    if (x - 50)**2 + (y - 38)**2 <= 100:
+        return 80
+    if x == 50 and y == 52:
+        return 85
     return 1
 
 fitness_map = []

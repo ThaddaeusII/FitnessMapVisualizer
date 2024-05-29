@@ -13,6 +13,9 @@ fitness = np.empty(1)
 maxfit = 1
 fitspace = 0.1
 jitter = 0.2
+pop = 0
+mut = 0.0
+gen = 0
 
 if len(sys.argv) != 6:
     print("Invalid Number of Arguments")
@@ -61,13 +64,18 @@ def readFile(filename):
     global x_data
     global y_data
     global jitter
+    global pop
+    global mut
+    global gen
     with open(filename, 'r') as file:
         line = file.readline().split();
+        pop = int(line[1])
+        line = file.readline().split();
+        mut = float(line[1])
+        line = file.readline().split();
         gen = int(line[1])
-        line = file.readline();
-        line = file.readline();
-        x_data = np.zeros(gen)
-        y_data = np.zeros(gen)
+        x_data = np.zeros(pop)
+        y_data = np.zeros(pop)
         i = 0
         for line in file:
             line = line.split()
@@ -79,6 +87,9 @@ def readFile(filename):
     x_data = x_data + np.random.normal(0, jitter, x_data.shape) 
     y_data = y_data + np.random.normal(0, jitter, y_data.shape) 
 
+# Get data
+readFile(loadfile)
+
 # Get fitness map
 getFitness(fitnessfile)
 
@@ -88,7 +99,7 @@ fig, ax = plt.subplots(figsize=(16,12))
 # Setup axis plot
 ax.set_xlabel("X Gene")
 ax.set_ylabel("Y Gene")
-title = ax.set_title("Generation=0")
+title = ax.set_title(f"Pop={pop}, Mut={mut}, Gen={gen}")
 ax.set_xlim(xlower, xupper - 1)
 ax.set_ylim(ylower, yupper - 1)
 ax.set_xticks(np.arange(xlower, xupper, 1))
@@ -109,7 +120,6 @@ cbar = plt.colorbar(contourf, ax=ax)
 cbar.set_label('Height')
 
 # Create scatter from file
-readFile(loadfile)
 scat = ax.scatter(x_data, y_data, marker = 'o', color = 'r')
 
 # Save plot

@@ -237,7 +237,8 @@ void Population::selectionRoulette()
     // Ensure population isn't dead
     if (roulette_map.GetWeight() == 0)
     {
-      std::cout << "Population is dead, can't evolve!" << std::endl;
+      std::cout << "Population is dead (pop1), can't evolve!" << std::endl;
+      exit(1);
       return;
     }
 
@@ -268,7 +269,10 @@ void Population::selectionRoulette()
     // Ensure population isn't dead
     if (roulette_map.GetWeight() == 0)
     {
-      std::cout << "Population is dead, can't evolve!" << std::endl;
+      displayFitnessFunction();
+      std::cout << roulette_map[0] << std::endl;
+      std::cout << "Population is dead (pop2), can't evolve!" << std::endl;
+      exit(1);
       return;
     }
 
