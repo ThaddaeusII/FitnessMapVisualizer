@@ -39,10 +39,10 @@ readFile(filename1)
 plt.plot(fitness_map_sizes, times, color='b')
 
 # Get data from file 2
-#readFile(filename2)
+readFile(filename2)
 
 # Plot data
-#plt.plot(fitness_map_sizes, times, color='r')
+plt.plot(fitness_map_sizes, times, color='r')
 
 # Save figure
 plt.savefig(savefile)
