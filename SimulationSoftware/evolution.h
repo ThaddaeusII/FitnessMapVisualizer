@@ -56,6 +56,7 @@ struct Population
               int tournament_size = 7,
               bool save_all = false,
               std::string save_dir = "./TestData");
+  void reset(int x = 0, int y = 0);
   
   // Parent selection methods
   void selectionTournament(int t);

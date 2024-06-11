@@ -161,6 +161,25 @@ void Population::evolve(int generations, char selection, int tournament_size, bo
 }
 
 /*
+ * Function to reset a population
+ * Arguments: None
+ * Returns: Nothing
+ */
+void Population::reset(int x, int y)
+{
+  gen = 0;
+  for (int i = 0; i < n; ++i)
+  {
+    pop1[i].x = x;
+    pop1[i].y = y;
+    pop1[i].getFitness(fitness_map);
+    pop2[i].x = x;
+    pop2[i].y = y;
+    pop2[i].getFitness(fitness_map);
+  }
+}
+
+/*
  * Function that creates a new generation via tournament selection
  * Arguments: Tournament size
  * Returns: Nothing
