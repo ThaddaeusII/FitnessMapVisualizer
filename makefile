@@ -24,7 +24,7 @@ web:
 		-I ./SimulationSoftware/ \
 		-I ../Empirical/include/ \
 		--js-library ../Empirical/include/emp/web/library_emp.js \
-		-s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']" \
+		-s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'allocate']" \
 		-s TOTAL_MEMORY=1024mb \
 		-s TOTAL_STACK=512mb \
 		-s EXPORTED_FUNCTIONS="['_main', '_empCppCallback']" \

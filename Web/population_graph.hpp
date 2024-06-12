@@ -75,10 +75,37 @@ public:
       "speed"
       );
 
+    // Text box for setting population
+    auto popTA = doc.AddTextArea([this](const std::string &s){ return GetPop(s); }, "pop_size");
+    popTA.SetSize(80, 20);
+    popTA.SetText(std::to_string(pop.n));
+
+    // Text box for setting mutation rate
+    auto mutTA = doc.AddTextArea([this](const std::string &s){ return GetMut(s); }, "mut_rate");
+    mutTA.SetSize(80, 20);
+    mutTA.SetText(std::to_string(pop.m));
+
     // Display FPS and current generation of population simulator
     doc << "<br>";
     doc << UI::Text("fps") << " FPS = " << UI::Live( [this](){return 1000.0 / GetStepTime();} );
     doc << UI::Text("gen") << " Gen = " << UI::Live( [this](){return pop.gen;} );
+  }
+
+  // Function to process user input for population, should set pop.n if valid
+  void GetPop(const std::string &s)
+  {
+    // Get integer for n and set
+    int n = stoi(s);
+    pop.n = n;
+    Redraw();
+  }
+
+  // Function to process user input for mutation rate, should set pop.m if valid
+  void GetMut(const std::string &s)
+  {
+    // Get double for m and set
+    double m = stod(s);
+    pop.m = m;
   }
 
   void Redraw()

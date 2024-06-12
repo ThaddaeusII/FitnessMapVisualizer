@@ -35,7 +35,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpxakjjb9j.js
+// include: /tmp/tmpoli6u9wy.js
 
   if (!Module.expectedDataFileDownloads) {
     Module.expectedDataFileDownloads = 0;
@@ -216,7 +216,7 @@ Module['FS_createPath']("/", "FitnessMaps", true, true);
 
   })();
 
-// end include: /tmp/tmpxakjjb9j.js
+// end include: /tmp/tmpoli6u9wy.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -836,121 +836,124 @@ var tempI64;
 // === Body ===
 
 var ASM_CONSTS = {
-  28644: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 28753: () => { var buffer = Module._malloc(emp_i.__outgoing_array.length*2); for (i=0; i<emp_i.__outgoing_array.length; i++) { stringToUTF8(emp_i.__outgoing_array[i], buffer+(i*2),2); } return buffer; },  
- 28943: () => { return emp_i.__outgoing_array.length },  
- 28982: () => { var arr_size = 0; for (i=0; i<emp_i.__outgoing_array.length; i++) { arr_size += emp_i.__outgoing_array[i].length + 1; } var buffer = Module._malloc(arr_size); var cumulative_size = 0; var cur_length = 0; for (i=0; i<emp_i.__outgoing_array.length; i++) { cur_length = emp_i.__outgoing_array[i].length + 1; stringToUTF8(emp_i.__outgoing_array[i], buffer + (cumulative_size), cur_length); cumulative_size += cur_length; } return buffer; },  
- 29420: () => { return emp_i.__outgoing_array.length },  
- 29459: () => { return Math.min( Math.max( document.documentElement.clientWidth, $(window).width(), window.innerWidth || 0 ), Math.max( document.documentElement.clientHeight, $(window).height(), window.innerHeight || 0 ) ); },  
- 29671: ($0) => { var id = UTF8ToString($0); var rect = $('#' + id).position(); if (rect === undefined) return -1.0; return rect.left; },  
- 29792: ($0) => { var id = UTF8ToString($0); var rect = $('#' + id).position(); if (rect === undefined) return -1.0; return rect.top; },  
- 29912: ($0) => { var id = UTF8ToString($0); return $('#' + id).width(); },  
- 29971: ($0) => { var id = UTF8ToString($0); return $('#' + id).height(); },  
- 30031: ($0) => { var id = UTF8ToString($0); return $('#' + id).innerWidth(); },  
- 30095: ($0) => { var id = UTF8ToString($0); return $('#' + id).innerHeight(); },  
- 30160: ($0) => { var id = UTF8ToString($0); return $('#' + id).outerWidth(); },  
- 30224: ($0) => { var id = UTF8ToString($0); return $('#' + id).outerHeight(); },  
- 30289: () => { if ( !globalThis.emp_init_once_flag ) { globalThis.emp_init_once_flag = true; return true; } else return false; },  
- 30405: () => { (function() { if (typeof globalThis === 'object') return; Object.prototype.__defineGetter__('__magic__', function() { return this; }); __magic__.globalThis = __magic__; delete Object.prototype.__magic__; }()); },  
- 30619: () => { window.requestAnimFrame = (function(callback) { return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) { window.setTimeout(callback, 1000 / 60); }; })(); },  
- 30920: ($0) => { emp_i.cb_return = $0; },  
- 30946: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 31055: () => { console.log('Callstack:\n' + stackTrace()); },  
- 31099: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 31208: () => { console.log('Callstack:\n' + stackTrace()); },  
- 31252: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 31361: () => { console.log('Callstack:\n' + stackTrace()); },  
- 31405: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 31514: () => { console.log('Callstack:\n' + stackTrace()); },  
- 31558: ($0, $1, $2) => { var id = UTF8ToString($0); var setting = UTF8ToString($1); var value = UTF8ToString($2); $( '#' + id ).css( setting, value); },  
- 31687: ($0, $1) => { var id = UTF8ToString($0); var name = UTF8ToString($1); $( '#' + id ).addClass( name); },  
- 31778: ($0, $1, $2) => { var id = UTF8ToString($0); var setting = UTF8ToString($1); var value = UTF8ToString($2); $( '#' + id ).attr( setting, value); },  
- 31908: ($0, $1, $2) => { var id = UTF8ToString($0); var name = UTF8ToString($1); $( '#' + id ).on( name, function(evt) { emp.Callback($2, evt); } ); },  
- 32036: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 32145: () => { console.log('Callstack:\n' + stackTrace()); },  
- 32189: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 32298: () => { console.log('Callstack:\n' + stackTrace()); },  
- 32342: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 32451: () => { console.log('Callstack:\n' + stackTrace()); },  
- 32495: ($0) => { var cname = UTF8ToString($0); var canvas = document.getElementById(cname); emp_i.ctx = canvas.getContext('2d'); },  
- 32611: ($0, $1, $2, $3) => { emp_i.ctx.clearRect($0, $1, $2, $3); },  
- 32652: ($0, $1, $2) => { emp_i.ctx.beginPath(); emp_i.ctx.arc($0, $1, $2, 0, Math.PI*2); },  
- 32720: ($0) => { emp_i.ctx.lineWidth = $0; },  
- 32750: ($0) => { emp_i.ctx.fillStyle = UTF8ToString($0); },  
- 32794: () => { emp_i.ctx.fill(); },  
- 32816: ($0) => { emp_i.ctx.strokeStyle = UTF8ToString($0); },  
- 32862: () => { emp_i.ctx.stroke(); },  
- 32886: ($0, $1, $2, $3) => { emp_i.ctx.beginPath(); emp_i.ctx.rect($0, $1, $2, $3); },  
- 32945: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 33054: () => { console.log('Callstack:\n' + stackTrace()); },  
- 33098: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 33207: () => { console.log('Callstack:\n' + stackTrace()); },  
- 33251: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 33360: () => { console.log('Callstack:\n' + stackTrace()); },  
- 33404: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 33513: () => { console.log('Callstack:\n' + stackTrace()); },  
- 33557: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 33666: () => { console.log('Callstack:\n' + stackTrace()); },  
- 33710: ($0, $1) => { parent_id = UTF8ToString($0); child_id = UTF8ToString($1); $(`#${parent_id}`).append(`<span id="${child_id}"></span>`); },  
- 33834: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 33943: () => { console.log('Callstack:\n' + stackTrace()); },  
- 33987: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 34096: () => { console.log('Callstack:\n' + stackTrace()); },  
- 34140: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 34249: () => { console.log('Callstack:\n' + stackTrace()); },  
- 34293: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 34402: () => { console.log('Callstack:\n' + stackTrace()); },  
- 34446: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 34555: () => { console.log('Callstack:\n' + stackTrace()); },  
- 34599: ($0, $1) => { var div_id = UTF8ToString($0); var div_obj = $(`#${div_id}`); if (div_obj == null) alert(div_id); var scroll_top = $1 * div_obj.scrollHeight; div_obj.scrollTop = scroll_top; },  
- 34777: function($0, $1) { var fun_name = UTF8ToString($1); emp[fun_name] = function() { emp_i.cb_args = []; for (var i = 0; i < arguments.length; i++) { emp_i.cb_args[i] = arguments[i]; } empCppCallback($0); return emp_i.cb_return; }; },  
- 34990: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 35099: () => { console.log('Callstack:\n' + stackTrace()); },  
- 35143: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 35252: () => { console.log('Callstack:\n' + stackTrace()); },  
- 35296: ($0) => { requestAnimFrame(function() { emp.Callback($0); }); },  
- 35352: () => { return (new Date()).getTime(); },  
- 35387: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 35496: () => { console.log('Callstack:\n' + stackTrace()); },  
- 35540: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 35649: () => { console.log('Callstack:\n' + stackTrace()); },  
- 35693: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 35802: () => { console.log('Callstack:\n' + stackTrace()); },  
- 35846: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 35955: () => { console.log('Callstack:\n' + stackTrace()); },  
- 35999: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 36108: () => { console.log('Callstack:\n' + stackTrace()); },  
- 36152: ($0, $1) => { parent_id = UTF8ToString($0); child_id = UTF8ToString($1); $('#' + parent_id).append('<span id="' + child_id + '"></span>'); },  
- 36281: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 36390: () => { console.log('Callstack:\n' + stackTrace()); },  
- 36434: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 36543: () => { console.log('Callstack:\n' + stackTrace()); },  
- 36587: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 36696: () => { console.log('Callstack:\n' + stackTrace()); },  
- 36740: ($0) => { var id = UTF8ToString($0); emp_i.cur_obj = $( '#' + id ); },  
- 36802: ($0, $1) => { var name = UTF8ToString($0); var value = UTF8ToString($1); emp_i.cur_obj.css( name, value); },  
- 36898: ($0) => { var name = UTF8ToString($0); emp_i.cur_obj.addClass( name ); },  
- 36963: ($0) => { var id = UTF8ToString($0); emp_i.cur_obj = $( '#' + id ); },  
- 37025: ($0, $1) => { var name = UTF8ToString($0); var value = UTF8ToString($1); emp_i.cur_obj.attr( name, value); },  
- 37122: ($0) => { var id = UTF8ToString($0); emp_i.cur_obj = $( '#' + id ); },  
- 37184: ($0, $1) => { var name = UTF8ToString($0); emp_i.cur_obj.on( name, function(evt) { emp.Callback($1, evt); } ); },  
- 37285: ($0, $1) => { var widget_id = UTF8ToString($0); var out_html = UTF8ToString($1); $('#' + widget_id).replaceWith(out_html); },  
- 37398: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 37507: () => { console.log('Callstack:\n' + stackTrace()); },  
- 37551: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 37660: () => { console.log('Callstack:\n' + stackTrace()); },  
- 37704: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 37813: () => { console.log('Callstack:\n' + stackTrace()); },  
- 37857: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 37966: () => { console.log('Callstack:\n' + stackTrace()); },  
- 38010: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 38119: () => { console.log('Callstack:\n' + stackTrace()); },  
- 38163: ($0) => { $( document ).ready(function() { emp.Callback($0); }); },  
- 38222: ($0) => { $( window ).on( "load", function() { emp.Callback($0); }); },  
- 38285: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 38394: () => { console.log('Callstack:\n' + stackTrace()); },  
- 38438: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
- 38547: () => { console.log('Callstack:\n' + stackTrace()); }
+  30564: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 30673: () => { var buffer = Module._malloc(emp_i.__outgoing_array.length*2); for (i=0; i<emp_i.__outgoing_array.length; i++) { stringToUTF8(emp_i.__outgoing_array[i], buffer+(i*2),2); } return buffer; },  
+ 30863: () => { return emp_i.__outgoing_array.length },  
+ 30902: () => { var arr_size = 0; for (i=0; i<emp_i.__outgoing_array.length; i++) { arr_size += emp_i.__outgoing_array[i].length + 1; } var buffer = Module._malloc(arr_size); var cumulative_size = 0; var cur_length = 0; for (i=0; i<emp_i.__outgoing_array.length; i++) { cur_length = emp_i.__outgoing_array[i].length + 1; stringToUTF8(emp_i.__outgoing_array[i], buffer + (cumulative_size), cur_length); cumulative_size += cur_length; } return buffer; },  
+ 31340: () => { return emp_i.__outgoing_array.length },  
+ 31379: () => { return Math.min( Math.max( document.documentElement.clientWidth, $(window).width(), window.innerWidth || 0 ), Math.max( document.documentElement.clientHeight, $(window).height(), window.innerHeight || 0 ) ); },  
+ 31591: ($0) => { var id = UTF8ToString($0); var rect = $('#' + id).position(); if (rect === undefined) return -1.0; return rect.left; },  
+ 31712: ($0) => { var id = UTF8ToString($0); var rect = $('#' + id).position(); if (rect === undefined) return -1.0; return rect.top; },  
+ 31832: ($0) => { var id = UTF8ToString($0); return $('#' + id).width(); },  
+ 31891: ($0) => { var id = UTF8ToString($0); return $('#' + id).height(); },  
+ 31951: ($0) => { var id = UTF8ToString($0); return $('#' + id).innerWidth(); },  
+ 32015: ($0) => { var id = UTF8ToString($0); return $('#' + id).innerHeight(); },  
+ 32080: ($0) => { var id = UTF8ToString($0); return $('#' + id).outerWidth(); },  
+ 32144: ($0) => { var id = UTF8ToString($0); return $('#' + id).outerHeight(); },  
+ 32209: () => { if ( !globalThis.emp_init_once_flag ) { globalThis.emp_init_once_flag = true; return true; } else return false; },  
+ 32325: () => { (function() { if (typeof globalThis === 'object') return; Object.prototype.__defineGetter__('__magic__', function() { return this; }); __magic__.globalThis = __magic__; delete Object.prototype.__magic__; }()); },  
+ 32539: () => { window.requestAnimFrame = (function(callback) { return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) { window.setTimeout(callback, 1000 / 60); }; })(); },  
+ 32840: ($0) => { emp_i.cb_return = $0; },  
+ 32866: ($0) => { return allocate(intArrayFromString(emp_i.cb_args[$0]), ALLOC_STACK); },  
+ 32939: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 33048: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 33092: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 33201: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 33245: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 33354: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 33398: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 33507: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 33551: ($0, $1, $2) => { var id = UTF8ToString($0); var setting = UTF8ToString($1); var value = UTF8ToString($2); $( '#' + id ).css( setting, value); },  
+ 33680: ($0, $1) => { var id = UTF8ToString($0); var name = UTF8ToString($1); $( '#' + id ).addClass( name); },  
+ 33771: ($0, $1, $2) => { var id = UTF8ToString($0); var setting = UTF8ToString($1); var value = UTF8ToString($2); $( '#' + id ).attr( setting, value); },  
+ 33901: ($0, $1, $2) => { var id = UTF8ToString($0); var name = UTF8ToString($1); $( '#' + id ).on( name, function(evt) { emp.Callback($2, evt); } ); },  
+ 34029: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 34138: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 34182: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 34291: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 34335: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 34444: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 34488: ($0) => { var cname = UTF8ToString($0); var canvas = document.getElementById(cname); emp_i.ctx = canvas.getContext('2d'); },  
+ 34604: ($0, $1, $2, $3) => { emp_i.ctx.clearRect($0, $1, $2, $3); },  
+ 34645: ($0, $1, $2) => { emp_i.ctx.beginPath(); emp_i.ctx.arc($0, $1, $2, 0, Math.PI*2); },  
+ 34713: ($0) => { emp_i.ctx.lineWidth = $0; },  
+ 34743: ($0) => { emp_i.ctx.fillStyle = UTF8ToString($0); },  
+ 34787: () => { emp_i.ctx.fill(); },  
+ 34809: ($0) => { emp_i.ctx.strokeStyle = UTF8ToString($0); },  
+ 34855: () => { emp_i.ctx.stroke(); },  
+ 34879: ($0, $1, $2, $3) => { emp_i.ctx.beginPath(); emp_i.ctx.rect($0, $1, $2, $3); },  
+ 34938: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 35047: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 35091: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 35200: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 35244: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 35353: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 35397: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 35506: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 35550: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 35659: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 35703: ($0, $1) => { parent_id = UTF8ToString($0); child_id = UTF8ToString($1); $(`#${parent_id}`).append(`<span id="${child_id}"></span>`); },  
+ 35827: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 35936: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 35980: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 36089: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 36133: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 36242: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 36286: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 36395: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 36439: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 36548: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 36592: ($0, $1) => { var div_id = UTF8ToString($0); var div_obj = $(`#${div_id}`); if (div_obj == null) alert(div_id); var scroll_top = $1 * div_obj.scrollHeight; div_obj.scrollTop = scroll_top; },  
+ 36770: function($0, $1) { var fun_name = UTF8ToString($1); emp[fun_name] = function() { emp_i.cb_args = []; for (var i = 0; i < arguments.length; i++) { emp_i.cb_args[i] = arguments[i]; } empCppCallback($0); return emp_i.cb_return; }; },  
+ 36983: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 37092: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 37136: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 37245: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 37289: ($0) => { requestAnimFrame(function() { emp.Callback($0); }); },  
+ 37345: () => { return (new Date()).getTime(); },  
+ 37380: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 37489: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 37533: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 37642: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 37686: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 37795: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 37839: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 37948: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 37992: function($0, $1) { var fun_name = UTF8ToString($1); emp[fun_name] = function() { emp_i.cb_args = []; for (var i = 0; i < arguments.length; i++) { emp_i.cb_args[i] = arguments[i]; } empCppCallback($0); return emp_i.cb_return; }; },  
+ 38205: ($0, $1) => { var id = UTF8ToString($0); var text = UTF8ToString($1); $('#' + id).val(text); },  
+ 38288: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 38397: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 38441: ($0, $1) => { parent_id = UTF8ToString($0); child_id = UTF8ToString($1); $('#' + parent_id).append('<span id="' + child_id + '"></span>'); },  
+ 38570: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 38679: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 38723: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 38832: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 38876: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 38985: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 39029: ($0) => { var id = UTF8ToString($0); emp_i.cur_obj = $( '#' + id ); },  
+ 39091: ($0, $1) => { var name = UTF8ToString($0); var value = UTF8ToString($1); emp_i.cur_obj.css( name, value); },  
+ 39187: ($0) => { var name = UTF8ToString($0); emp_i.cur_obj.addClass( name ); },  
+ 39252: ($0) => { var id = UTF8ToString($0); emp_i.cur_obj = $( '#' + id ); },  
+ 39314: ($0, $1) => { var name = UTF8ToString($0); var value = UTF8ToString($1); emp_i.cur_obj.attr( name, value); },  
+ 39411: ($0) => { var id = UTF8ToString($0); emp_i.cur_obj = $( '#' + id ); },  
+ 39473: ($0, $1) => { var name = UTF8ToString($0); emp_i.cur_obj.on( name, function(evt) { emp.Callback($1, evt); } ); },  
+ 39574: ($0, $1) => { var widget_id = UTF8ToString($0); var out_html = UTF8ToString($1); $('#' + widget_id).replaceWith(out_html); },  
+ 39687: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 39796: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 39840: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 39949: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 39993: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 40102: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 40146: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 40255: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 40299: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 40408: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 40452: ($0) => { $( document ).ready(function() { emp.Callback($0); }); },  
+ 40511: ($0) => { $( window ).on( "load", function() { emp.Callback($0); }); },  
+ 40574: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 40683: () => { console.log('Callstack:\n' + stackTrace()); },  
+ 40727: ($0) => { msg = UTF8ToString($0); if (typeof alert == "undefined") { globalThis.alert = console.log; } alert(msg); },  
+ 40836: () => { console.log('Callstack:\n' + stackTrace()); }
 };
 
 // end include: preamble.js
@@ -4667,6 +4670,28 @@ var ASM_CONSTS = {
       return (...args) => ccall(ident, returnType, argTypes, args, opts);
     };
 
+  var ALLOC_NORMAL = 0;
+  
+  var ALLOC_STACK = 1;
+  
+  
+  
+  var allocate = (slab, allocator) => {
+      var ret;
+  
+      if (allocator == ALLOC_STACK) {
+        ret = stackAlloc(slab.length);
+      } else {
+        ret = _malloc(slab.length);
+      }
+  
+      if (!slab.subarray && !slab.slice) {
+        slab = new Uint8Array(slab);
+      }
+      HEAPU8.set(slab, ret);
+      return ret;
+    };
+
 
 
   var FS_unlink = (path) => FS.unlink(path);
@@ -4723,6 +4748,7 @@ var wasmExports = createWasm();
 var ___wasm_call_ctors = () => (___wasm_call_ctors = wasmExports['__wasm_call_ctors'])();
 var _empCppCallback = Module['_empCppCallback'] = (a0) => (_empCppCallback = Module['_empCppCallback'] = wasmExports['empCppCallback'])(a0);
 var _main = Module['_main'] = (a0, a1) => (_main = Module['_main'] = wasmExports['main'])(a0, a1);
+var _malloc = (a0) => (_malloc = wasmExports['malloc'])(a0);
 var __emscripten_stack_restore = (a0) => (__emscripten_stack_restore = wasmExports['_emscripten_stack_restore'])(a0);
 var __emscripten_stack_alloc = (a0) => (__emscripten_stack_alloc = wasmExports['_emscripten_stack_alloc'])(a0);
 var _emscripten_stack_get_current = () => (_emscripten_stack_get_current = wasmExports['emscripten_stack_get_current'])();
@@ -4747,6 +4773,7 @@ Module['cwrap'] = cwrap;
 Module['FS_createPreloadedFile'] = FS.createPreloadedFile;
 Module['FS_createDataFile'] = FS.createDataFile;
 Module['FS_unlink'] = FS.unlink;
+Module['allocate'] = allocate;
 
 
 var calledRun;
