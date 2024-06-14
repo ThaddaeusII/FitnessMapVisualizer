@@ -1,6 +1,7 @@
 #ifndef POPULATION_GRAPH_HPP
 #define POPULATION_GRAPH_HPP
 
+#include "emp/web/TextArea.hpp"
 #include "evolution.h"
 #include "emp/web/Document.hpp"
 #include "emp/web/Canvas.hpp"
@@ -17,44 +18,48 @@ private:
 
   UI::Document &doc; // Reference to website document
   UI::Canvas fscape; // Canvas to draw on
+  UI::Button startBut; // Button for start/pausing evolution
+  UI::Button resetBut; // Button for resetting population
+  UI::Button speedBut; // Button for changing display speed
+  UI::TextArea popTA; // Textbox for updating population size
+  UI::TextArea mutTA; // Textbox for updating mutation rate
+  UI::Text fpsText; // Text to display FPS
+  UI::Text genText; // Text to display current generation
   
   Population &pop; // Reference to website population
   
   emp::Random rng; // Random generator for jitter
 
 public:
-  PopulationGraph(double size, UI::Document &d, Population &p) :
+  PopulationGraph(double size, UI::Document &d, Population &p, UI::Table &layout) :
     csize(size),
     time_since_last_evolve(0.0),
     fast(true),
     doc(d),
-    fscape(doc.AddCanvas(csize, csize, "fscape")),
+    fscape(csize, csize, "fscape"),
     pop(p)
   {
     // Setup population simulator
     pop.loadFitnessFunction("./FitnessMaps/10x10_big_vs_small_unequal_peaks.map");
     DrawFitnessMap();
     DrawPopulation();
-    doc << "<br>";
   
     // Button for playing / stopping animation for population simulator
-    doc.AddButton(
+    startBut = UI::Button(
       [this]()
       {
         ToggleActive();
-        auto but = doc.Button("start");
-        if (GetActive()) but.SetLabel("Pause");
-        else but.SetLabel("Start");
+        if (GetActive()) startBut.SetLabel("Pause");
+        else startBut.SetLabel("Start");
       },
       "Start",
       "start"
       );
 
     // Button for restarting
-    doc.AddButton(
+    resetBut = UI::Button(
       [this]()
       {
-        auto but = doc.Button("reset");
         pop.reset(6, 5); // Change this so starting pos can be changed
         Redraw();
       },
@@ -63,12 +68,11 @@ public:
       );
 
     // Button for determining animation mode
-    doc.AddButton(
+    speedBut = UI::Button(
       [this]()
       {
-        auto but = doc.Button("speed");
-        if (fast) but.SetLabel("Fast");
-        else but.SetLabel("Slow");
+        if (fast) speedBut.SetLabel("Fast");
+        else speedBut.SetLabel("Slow");
         fast = !fast;
       },
       "Slow",
@@ -76,19 +80,25 @@ public:
       );
 
     // Text box for setting population
-    auto popTA = doc.AddTextArea([this](const std::string &s){ return GetPop(s); }, "pop_size");
+    popTA = UI::TextArea([this](const std::string &s){ return GetPop(s); }, "pop_size");
     popTA.SetSize(80, 20);
     popTA.SetText(std::to_string(pop.n));
 
     // Text box for setting mutation rate
-    auto mutTA = doc.AddTextArea([this](const std::string &s){ return GetMut(s); }, "mut_rate");
+    mutTA = UI::TextArea([this](const std::string &s){ return GetMut(s); }, "mut_rate");
     mutTA.SetSize(80, 20);
     mutTA.SetText(std::to_string(pop.m));
 
     // Display FPS and current generation of population simulator
-    doc << "<br>";
-    doc << UI::Text("fps") << " FPS = " << UI::Live( [this](){return 1000.0 / GetStepTime();} );
-    doc << UI::Text("gen") << " Gen = " << UI::Live( [this](){return pop.gen;} );
+    fpsText = UI::Text("fps");
+    fpsText << " FPS = " << UI::Live( [this](){return 1000.0 / GetStepTime();} );
+    genText = UI::Text("gen");
+    genText << " Gen = " << UI::Live( [this](){return pop.gen;} );
+
+    // Set layout
+    layout.GetCell(0, 0) << fscape;
+    layout.GetCell(1, 0) << startBut << resetBut << speedBut << popTA << mutTA
+      << "<br>" << fpsText << genText;
   }
 
   // Function to process user input for population, should set pop.n if valid
@@ -129,7 +139,7 @@ public:
     // Update the population
     time_since_last_evolve += GetStepTime();
     if (fast)
-      pop.evolve(1);
+      pop.evolve(1, 'r');
     else if (time_since_last_evolve >= 1000)
     {
       pop.evolve(1);
