@@ -18,6 +18,7 @@ private:
 
   UI::Document &doc; // Reference to website document
   UI::Canvas fscape; // Canvas to draw on
+  UI::Table localLayout; // Track local elements layout
   UI::Button startBut; // Button for start/pausing evolution
   UI::Button resetBut; // Button for resetting population
   UI::Button speedBut; // Button for changing display speed
@@ -37,6 +38,7 @@ public:
     fast(true),
     doc(d),
     fscape(csize, csize, "fscape"),
+    localLayout(4, 1, "pop_graph_layout"),
     pop(p)
   {
     // Setup population simulator
@@ -96,9 +98,13 @@ public:
     genText << " Gen = " << UI::Live( [this](){return pop.gen;} );
 
     // Set layout
-    layout.GetCell(0, 0) << fscape;
-    layout.GetCell(1, 0) << startBut << resetBut << speedBut << popTA << mutTA
-      << "<br>" << fpsText << genText;
+    layout.GetCell(0, 0) << localLayout;
+    localLayout.CellsCSS("border", "1px solid black");
+    localLayout.CellsCSS("padding", "5px");
+    localLayout.GetCell(0, 0) << fscape;
+    localLayout.GetCell(1, 0) << startBut << resetBut << speedBut;
+    localLayout.GetCell(2, 0) << popTA << mutTA;
+    localLayout.GetCell(3, 0) << fpsText << genText;
   }
 
   // Function to process user input for population, should set pop.n if valid

@@ -20,7 +20,7 @@ profile:
 
 web:
 	em++ -std=c++20 -Os \
-		-g -Wall -Wno-unused-function -Wbad-function-cast -Wcast-function-type \
+		-DNDEBUG \
 		-I ./SimulationSoftware/ \
 		-I ../Empirical/include/ \
 		--js-library ../Empirical/include/emp/web/library_emp.js \

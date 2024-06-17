@@ -1,10 +1,9 @@
 #ifndef WEBSITE_HPP
 #define WEBSITE_HPP
 
-#include "emp/web/Canvas.hpp"
 #include "evolution.h"
 #include "population_graph.hpp"
-#include "emp/web/Document.hpp"
+#include "fitness_editor.hpp"
 
 namespace UI = emp::web;
 
@@ -18,11 +17,8 @@ private:
   UI::Document doc; // HTML doc for the website
   UI::Table layout; // Table for setting layout of objects
   PopulationGraph pg; // Animated graph for visualizing population and fitness landscape
+  SimulationEditor se; // Allow for easy modification of population and fitness
   UI::Table fmap; // Table for showing fitness landscape
-
-  // Testing stuff, needs removed
-  UI::Canvas can;
-  UI::Table tab;
 
 public: 
 
@@ -33,21 +29,14 @@ public:
     doc("emp_base"),
     layout(3, 3, "layout"),
     pg(csize, doc, pop, layout),
-    fmap(1, 1, "fmap"),
-    can(200, 200, "can"),
-    tab(4, 4, "tab")
+    se(csize, doc, pop, layout),
+    fmap(1, 1, "fmap")
   {
     // Setup page layout
     doc << layout;
-    layout.GetCell(0, 1) << fmap;
-    layout.GetCell(0, 2) << can;
-    layout.GetCell(2, 2) << tab;
+    layout.GetCell(1, 1) << fmap;
     layout.CellsCSS("border", "1px solid black");
     layout.CellsCSS("padding", "5px");
-
-    can.Rect(0, 0, 200, 200, "black");
-    tab.CellsCSS("border", "1px solid black");
-    tab.CellsCSS("padding", "5px");
 
     // Setup fitness map editor / visualizer
     UpdateFitnessTable();
