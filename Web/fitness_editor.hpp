@@ -18,6 +18,21 @@ private:
   int endTileX; // Tile X selected by mouse up
   int endTileY; // Tile Y selected by mouse up
   std::set<std::pair<int, int>> selected; // Selected items for update
+  std::map<int, std::string> colorMap; // Maps a fitness value to color
+
+  std::vector<std::string> presetColors =
+    {
+      "#3B4CC0",
+      "#4673CA",
+      "#5891D1",
+      "#6BAEDA",
+      "#82CAE3",
+      "#A0E0EF",
+      "#C1F1EA",
+      "#E6FCF2",
+      "#F2E8BF",
+      "#F3C68D"
+    };
 
   UI::Document &doc; // Document from website class
   Population &pop; // Population from website class
@@ -39,6 +54,9 @@ public:
     localLayout(3, 1, "editor_layout"),
     canvas(csize, csize, "editor_canvas")
   {
+    // Creates a color map based on default fitness map (needs to be called after population loads fitness map)
+    CreateColorMap();
+
     // Add methods for selecting tiles to manage
     canvas.OnMouseDown( [this](int x, int y) { MouseDown(x, y); } );
     canvas.OnMouseUp( [this](int x, int y) { MouseUp(x, y); } );
@@ -88,6 +106,7 @@ public:
       {
         for (auto &p : selected)
           pop.fitness_map[p.second][p.first] = entryValue;
+        CreateColorMap();
         DrawSimulationMap();
       },
       "Set Value",
@@ -135,9 +154,6 @@ public:
   // Function to select tile
   void MouseDown(int x, int y)
   {
-    std::cout << x << " vs " << canvas.GetXPos() << std::endl;
-    std::cout << y << " vs " << canvas.GetYPos() << std::endl;
-
     double unit = csize / pop.xlim;
     
     // Set start tile
@@ -172,25 +188,63 @@ public:
     DrawSimulationMap();
   }
 
+  // Function to create color map
+  void CreateColorMap()
+  {
+    // Reset color mapping
+    colorMap.clear();
+
+    // Add all fitness levels (std::map will auto sort)
+    for (int i = 0; i < pop.xlim; ++i)
+    {
+      for (int j = 0; j < pop.ylim; ++j)
+      {
+        colorMap.insert(std::pair<int, std::string>(pop.fitness_map[j][i], "black"));
+      }
+    }
+    
+    // If there are no more than 10 fitness levels outside of 0, use preset colors
+    if (colorMap.size() <= 10 || (colorMap.size() == 11 && colorMap.count(0)))
+    {
+      int i = 0;
+      for (auto it = colorMap.begin(); it != colorMap.end(); ++it)
+      {
+        // Zero gets set to black
+        if (it->first == 0)
+        {
+          it->second = "black";
+          continue;
+        }
+
+        it->second = presetColors[i];
+        ++i;
+      }
+    }
+    else // Map colors as needed
+    {
+
+    }
+  }
+
   // Function that draws the fitness landscape as a background
   void DrawSimulationMap()
   {
     canvas.Clear();
 
     double unit = csize / pop.xlim;
-    std::string color;
+    std::string borderColor = "black";
 
     for (int i = 0; i < pop.xlim; ++i)
     {
       for (int j = 0; j < pop.ylim; ++j)
       {
-        // Check if tile was selected, display red if it was
-        std::string color = "grey";
-        if (selected.contains(std::pair<int, int>(i, j)))
-          color = "red";
+        borderColor = "grey";
 
-        // Draw grid tile using assigned color
-        canvas.Rect(unit * i, unit * j, unit, unit, color, "black");
+        // Check if tile was selected, display differently if it was
+        if (selected.contains(std::pair<int, int>(i, j)))
+          canvas.Rect(unit * i, unit * j, unit, unit, "white", "black");
+        else // Draw grid tile using assigned color otherwise
+          canvas.Rect(unit * i, unit * j, unit, unit, colorMap[pop.fitness_map[j][i]], "black");
       }
     }
   }

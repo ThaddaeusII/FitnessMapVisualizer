@@ -31,7 +31,10 @@ web:
 		-s NO_EXIT_RUNTIME=1 \
 		-o ./Web/website.js \
 		./Web/main.cpp ./SimulationSoftware/evolution.cpp \
-		--preload-file ./FitnessMaps/10x10_big_vs_small_unequal_peaks.map
+		--preload-file ./FitnessMaps/10x10_big_vs_small_unequal_peaks.map \
+		--preload-file ./FitnessMaps/100x100_big_vs_small_unequal_peaks.map \
+		--preload-file ./FitnessMaps/100x100_comb.map \
+		--preload-file ./FitnessMaps/10x10_ring.map
 
 # Clean up the mess
 clean:
