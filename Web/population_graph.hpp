@@ -31,7 +31,11 @@ private:
   int startTileY; // Tile Y selected by mouse down
   int endTileX; // Tile X selected by mouse up
   int endTileY; // Tile Y selected by mouse up
-  
+  int colorSelected = -1; // Selected color on the map
+  bool drawingOn = false; // Bool for if currently able to draw the fitness levels
+  double selectedColorFitness; // fitness associated with current color selected, for drawing
+ 
+  // Modes that the simulator can be in, Simulation, Population Editor, and Fitness Editor
   enum GraphMode
   {
     SIM,
@@ -61,7 +65,9 @@ private:
   UI::Document &doc; // Reference to website document
   UI::Canvas fscape; // Canvas to draw on
   UI::Table localLayout; // Track local elements layout
+  UI::Table colorMapLayout; // Table to arrange colors
   emp::Random rng; // Random generator for jitter
+  emp::vector<UI::Canvas> colorMapTiles; // Tiles for displaying color map
 
   // Mode selection
   UI::Button simulationButton; // Select simulation mode
@@ -100,7 +106,8 @@ public:
     fast(true),
     doc(d),
     fscape(csize, csize, "fscape"),
-    localLayout(5, 2, "pop_graph_layout"),
+    localLayout(3, 3, "pop_graph_layout"),
+    colorMapLayout(1, 1, "col_map_layout"),
     pop(p)
   {
     // Setup population simulator with default fitness map
@@ -108,11 +115,13 @@ public:
     CreateColorMap();
     DrawFitnessMap();
     DrawPopulation();
+    DrawColorMap();
 
     // Add methods for selecting tiles to manage
     fscape.OnMouseDown( [this](int x, int y) { MouseDown(x, y); } );
     fscape.OnMouseUp( [this](int x, int y) { MouseUp(x, y); } );
-
+    fscape.OnMouseMove( [this](int x, int y) { MouseMove(x, y); } );
+      
     // Button for setting simulator mode
     simulationButton = UI::Button(
       [this]()
@@ -397,20 +406,19 @@ public:
     // Landscape, main portion
     localLayout.GetCell(1, 0) << fscape;
     
-    // Editor label
-    localLayout.GetCell(0, 1) << "Simulation Editor";
+    // Color map label
+    localLayout.GetCell(0, 1) << "Color Map";
 
-    // Editor options
-    localLayout.GetCell(1, 1)
-      << "Population: " << popEntryTA << popEntryButton << "<br>"
-      << "Mutation rate: " << mutEntryTA << mutEntryButton << "<br>"
-      << "<br><br>"
-      << "Existing Maps: " << fitnessMapSelector << fitnessMapButton << "<br>"
-      << "Fitness Value: " << fitnessEntryTA << fitnessEntryButton << fitnessClearButton << "<br>"
-      << "Map Dimension: " << fitnessSizeEntryTA << fitnessSizeEntryButton << "<br>"
-      << "<br><br>"
-      << "Save/Load Settings: " << saveButton << loadButton;
-    localLayout.GetCell(1, 1).SetCSS("vertical-align", "top");
+    // Color map
+    localLayout.GetCell(1, 1) << colorMapLayout;
+    colorMapLayout.CellsCSS("border", "1px solid black");
+    colorMapLayout.CellsCSS("padding", "5px");
+
+    // Editor label
+    localLayout.GetCell(0, 2) << "Simulation Editor";
+    
+    // Editor options are set in ModeSwap()
+    // localLayout.GetCell(1, 2);
 
     // Simulation options
     localLayout.GetCell(2, 0) << startButton << resetButton << speedButton
@@ -429,7 +437,7 @@ public:
     DrawFitnessMap();
 
     // Draw updated population if in simulation mode
-    if (mode == SIM)
+    if (mode != FIT)
       DrawPopulation();
 
     // Redraw FPS and Generation
@@ -456,17 +464,19 @@ public:
   void DrawFitnessMap()
   {
     double unit = csize / pop.xlim;
-    std::string color;
+    std::string border;
 
     for (int i = 0; i < pop.xlim; ++i)
     {
       for (int j = 0; j < pop.ylim; ++j)
       {
+        border = "black";
+
         // Check if tile was selected, display differently if it was
         if (selected.contains(std::pair<int, int>(i, j)))
-          fscape.Rect(unit * i, unit * j, unit, unit, "white", "black");
-        else // Draw grid tile using assigned color otherwise
-          fscape.Rect(unit * i, unit * j, unit, unit, colorMap[pop.fitness_map[j][i]], "black");
+          border = "red";
+
+        fscape.Rect(unit * i, unit * j, unit, unit, colorMap[pop.fitness_map[j][i]], border);
       }
     }
   }
@@ -479,8 +489,8 @@ public:
     for (int i = 0; i < pop.n; ++i)
     {
       // Add jitter
-      double xjitter = rng.GetDouble(-0.4, 0.4);
-      double yjitter = rng.GetDouble(-0.4, 0.4);
+      double xjitter = rng.GetDouble(-0.35, 0.35);
+      double yjitter = rng.GetDouble(-0.35, 0.35);
     
       // Choose x and y from current population, +0.5 to center on squares
       double x = ((pop.first_pop) ? pop.pop1[i].x : pop.pop2[i].x) + 0.5;
@@ -491,47 +501,141 @@ public:
     }
   }
 
+  // Draw the color map
+  void DrawColorMap()
+  {
+    // Clear the color map table and resize as needed
+    colorMapLayout.ClearCells();
+    colorMapLayout.Resize(colorMap.size(), 2);
+    colorMapLayout.CellsCSS("border", "1px solid black");
+    colorMapLayout.CellsCSS("padding", "5px");
+
+    // Add new tile canvases if needed
+    while (colorMap.size() > colorMapTiles.size())
+      colorMapTiles.push_back(UI::Canvas(40, 40));
+
+    // Display all colors vs fitness in table
+    int i = 0;
+    for (auto &c : colorMap)
+    {
+      colorMapTiles[i].Rect(0, 0, 40, 40, c.second, "black");
+      colorMapTiles[i].OnMouseDown(
+        [this, c, i](int x, int y)
+        {
+          if (mode != FIT)
+            return;
+
+          // If another color was selected, reset it
+          if (colorSelected != -1)
+          {
+            auto it = colorMap.begin();
+            std::advance(it, colorSelected);
+            colorMapTiles[colorSelected].Rect(0, 0, 40, 40, it->second, "black");
+          }
+
+          // If this color was selected already, reset
+          if (colorSelected == i)
+          {
+            colorSelected = -1;
+            selectedColorFitness = -1;
+            return;
+          }
+
+          // Otherwise, highlight border
+          colorSelected = i;
+          colorMapTiles[i].Clear();
+          colorMapTiles[i].Rect(0, 0, 40, 40, "red", "black");
+          colorMapTiles[i].Rect(3, 3, 34, 34, c.second, "black");
+          selectedColorFitness = c.first;
+        }
+        );
+      colorMapLayout.GetCell(i, 0) << colorMapTiles[i];
+      colorMapLayout.GetCell(i, 1) << c.first;
+      i++;
+    }
+  }
+
   // Function to select tile
   void MouseDown(int x, int y)
   {
-    if (mode == SIM)
-      return;
-
-    double unit = csize / pop.xlim;
+    if (mode == POP)
+    {
+      double unit = csize / pop.xlim;
     
-    // Set start tile
-    startTileX = (x / unit);
-    startTileY = (y / unit);
+      // Set start tile
+      startTileX = (x / unit);
+      startTileY = (y / unit);
+    }
+    else if (mode == FIT)
+    {
+      drawingOn = true;
+      
+      if (colorSelected >= 0)
+      {
+        // Check the click location for drawing, same as MouseMove
+        double unit = csize / pop.xlim;
+        int tileX = (x / unit);
+        int tileY = (y / unit);
+
+        // Color tile with new color
+        if (pop.fitness_map[tileY][tileX] != selectedColorFitness)
+        {
+          pop.fitness_map[tileY][tileX] = selectedColorFitness;
+          Redraw();
+        }
+      }
+    }
   }
 
   // Function to select tile
   void MouseUp(int x, int y)
   {
-    if (mode == SIM)
-      return;
-
-    double unit = csize / pop.xlim;
-    
-    // Set end tile
-    endTileX = (x / unit);
-    endTileY = (y / unit);
-
-    // Select range
-    for (int i = std::min(startTileX, endTileX); i < std::max(startTileX, endTileX) + 1; ++i)
+    if (mode == POP)
     {
-      for (int j = std::min(startTileY, endTileY); j < std::max(startTileY, endTileY) + 1; ++j)
+      double unit = csize / pop.xlim;
+    
+      // Set end tile
+      endTileX = (x / unit);
+      endTileY = (y / unit);
+
+      // Select range
+      for (int i = std::min(startTileX, endTileX); i < std::max(startTileX, endTileX) + 1; ++i)
       {
-        auto it = selected.find(std::pair<int, int>(i, j));
-        if (it != selected.end())
+        for (int j = std::min(startTileY, endTileY); j < std::max(startTileY, endTileY) + 1; ++j)
         {
-          selected.erase(it);
-          continue;
+          auto it = selected.find(std::pair<int, int>(i, j));
+          if (it != selected.end())
+          {
+            selected.erase(it);
+            continue;
+          }
+          selected.insert(std::pair<int, int>(i, j));
         }
-        selected.insert(std::pair<int, int>(i, j));
+      }
+
+      Redraw();
+    }
+    else if (mode == FIT)
+    {
+      drawingOn = false;
+    }
+  }
+
+  void MouseMove(int x, int y)
+  {
+    if (mode == FIT && drawingOn && colorSelected >= 0)
+    {
+      double unit = csize / pop.xlim;
+      int tileX = (x / unit);
+      int tileY = (y / unit);
+
+      // Color tile with new color
+      if (pop.fitness_map[tileY][tileX] != selectedColorFitness)
+      {
+        pop.fitness_map[tileY][tileX] = selectedColorFitness;
+        Redraw();
       }
     }
-
-    Redraw();
   }
 
   // Function to create color map
@@ -572,6 +676,9 @@ public:
       std::cout << "More colors for colormap needs implemented!" << std::endl;
       std::cout << "Color map size: " << colorMap.size() << std::endl;
     }
+
+    // Redraw the color map
+    DrawColorMap();
   }
 
   // Function to handle mode swapping, such as enabling/disabling elements, pausing simulation, etc
@@ -589,6 +696,12 @@ public:
       startButton.SetLabel("Start");
     }
 
+    // Clear editor table, add general settings
+    localLayout.ClearCell(1, 2);
+    localLayout.GetCell(1, 2).SetCSS("border", "1px solid black");
+    localLayout.GetCell(1, 2).SetCSS("padding", "5px");
+    localLayout.GetCell(1, 2).SetCSS("vertical-align", "top");
+
     // Mode selection buttons
     simulationButton.SetDisabled(sim);
     populationButton.SetDisabled(pop);
@@ -600,25 +713,31 @@ public:
     speedButton.SetDisabled(!sim);
 
     // Population editor elements
-    popEntryButton.SetDisabled(!pop);
-    popEntryTA.SetDisabled(!pop);
-    mutEntryButton.SetDisabled(!pop);
-    mutEntryTA.SetDisabled(!pop);
+    if (pop)
+    {
+      localLayout.GetCell(1, 2)
+        << "Population: " << popEntryTA << popEntryButton << "<br>"
+        << "Mutation rate: " << mutEntryTA << mutEntryButton << "<br>"
+        << "<br><br>"
+        << "Save/Load Settings: " << saveButton << loadButton;
+    }
 
     // Fitness map editor elements
-    fitnessMapSelector.Disabled(!fit); // Different naming scheme for whatever reason, does same as rest
-    fitnessMapButton.SetDisabled(!fit);
-    fitnessEntryButton.SetDisabled(!fit);
-    fitnessEntryTA.SetDisabled(!fit);
-    fitnessClearButton.SetDisabled(!fit);
-    fitnessSizeEntryButton.SetDisabled(!fit);
-    fitnessSizeEntryTA.SetDisabled(!fit);
-
-    // If mode is not fitness editor
-    if (!fit)
+    if (fit)
     {
-      selected.clear();
+      localLayout.GetCell(1, 2)
+        << "Existing Maps: " << fitnessMapSelector << fitnessMapButton << "<br>"
+        << "Fitness Value: " << fitnessEntryTA << fitnessEntryButton << fitnessClearButton << "<br>"
+        << "Map Dimension: " << fitnessSizeEntryTA << fitnessSizeEntryButton << "<br>"
+        << "<br><br>"
+        << "Save/Load Settings: " << saveButton << loadButton;
     }
+
+    // Clear any selected elements
+    selected.clear();
+
+    // Draw color map to remove any selections / update changes
+    DrawColorMap();
   }
 };
 
