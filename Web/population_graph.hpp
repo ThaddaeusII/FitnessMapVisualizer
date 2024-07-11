@@ -23,8 +23,8 @@ private:
   double csize; // Size of canvas
   double timeSinceLastEvolve; // Time since last evolution, used for 1 evolve per second mode
   bool fast; // Run animation at fullspeed if true, else 1 fps
-  double fitnessEntryValue; // Value stored in fitnessEntryTA, used to update fitness map
   int fitnessSizeEntryValue; // Value stored in fitnessSizeEntryTA, used to update fitness map
+  double fitnessTileEntryValue; // Value stored in fitnessTileEntryTA, used to add new fitness level to color map
   int popEntryValue; // Value stored in popEntryTA, used to update population size
   double mutEntryValue; // Value stored in mutEntryTA, used to update mutation rate
   int startTileX; // Tile X selected by mouse down
@@ -34,6 +34,7 @@ private:
   int colorSelected = -1; // Selected color on the map
   bool drawingOn = false; // Bool for if currently able to draw the fitness levels
   double selectedColorFitness; // fitness associated with current color selected, for drawing
+  std::string colorHexValue; // Value of currently entered hex
  
   // Modes that the simulator can be in, Simulation, Population Editor, and Fitness Editor
   enum GraphMode
@@ -84,11 +85,13 @@ private:
   UI::Button loadButton; // Load file
   UI::Selector fitnessMapSelector; // Selector for loading existing fitness maps
   UI::Button fitnessMapButton; // Sets the file based on selector
-  UI::Button fitnessClearButton; // Clears selected tiles
-  UI::TextArea fitnessEntryTA; // Where to set new values for fitness landscape
-  UI::Button fitnessEntryButton; // Enter to set value from fitnessEntryTA
   UI::TextArea fitnessSizeEntryTA; // Where to set new values for fitness landscape size
   UI::Button fitnessSizeEntryButton; // Enter to set value from fitnessSizeEntryTA
+  UI::TextArea fitnessTileEntryTA; // Where to set new values for fitness landscape tile
+  UI::Button fitnessTileEntryButton; // Enter to add new fitness level to color map
+  UI::TextArea setColorHexTA; // Entry area for changing color map colors
+  UI::Button setColorHexButton; // Button for setting color from setColorHexTA
+  UI::Button removeColorButton; // Button for removing a color
   UI::TextArea popEntryTA; // Textbox for updating population size
   UI::Button popEntryButton; // Enter to set value from popEntryTA
   UI::TextArea mutEntryTA; // Textbox for updating mutation rate
@@ -250,47 +253,6 @@ public:
         "fitness_map_button"
       );
 
-    fitnessClearButton = UI::Button(
-      [this]()
-      {
-        selected.clear();
-        Redraw();
-      },
-      "Clear",
-      "clear_selected_button"
-      );
-
-    fitnessEntryTA = UI::TextArea(
-      [this](const std::string &s)
-      {
-        char* end;
-        fitnessEntryValue = std::strtod(s.c_str(), &end);
-        if (end == s.c_str() || *end != '\0' || fitnessEntryValue < 0.0)
-        {
-          fitnessEntryButton.SetDisabled();
-          fitnessEntryTA.SetBorder("1px solid red");
-          return;
-        }
-        fitnessEntryButton.SetDisabled(false);
-        fitnessEntryTA.SetBorder("1px solid black");
-      },
-      "fitness_entry_area"
-      );
-    fitnessEntryTA.SetSize(80, 20);
-    fitnessEntryTA.SetResizableOff();
-
-    fitnessEntryButton = UI::Button(
-      [this]()
-      {
-        for (auto &p : selected)
-          pop.fitness_map[p.second][p.first] = fitnessEntryValue;
-        CreateColorMap();
-        Redraw();
-      },
-      "Set Value",
-      "fitness_entry_button"
-      );
-
     // Text box for entering the size of the fitness map
     fitnessSizeEntryTA = UI::TextArea(
       [this](const std::string &s)
@@ -328,6 +290,115 @@ public:
       "Set Value",
       "fitness_size_entry_button"
       );
+
+    // Text box for entering the size of the fitness map
+    fitnessTileEntryTA = UI::TextArea(
+      [this](const std::string &s)
+      {
+        char* end;
+        fitnessTileEntryValue = strtod(s.c_str(), &end);
+        if (end == s.c_str() || *end != '\0' || fitnessTileEntryValue < 1 || fitnessTileEntryValue > MAX_GENE_SIZE)
+        {
+          fitnessTileEntryButton.SetDisabled();
+          fitnessTileEntryTA.SetBorder("1px solid red");
+          return;
+        }
+        fitnessTileEntryButton.SetDisabled(false);
+        fitnessTileEntryTA.SetBorder("1px solid black");
+      },
+      "fitness_tile_entry_area"
+      );
+    fitnessTileEntryTA.SetSize(80, 20);
+    fitnessTileEntryTA.SetResizableOff();
+
+    fitnessTileEntryButton = UI::Button(
+      [this]()
+      {
+        // Add a new color and redraw, with fitness from fitnessTileEntryTA
+        colorMap.insert(std::pair<int, std::string>(fitnessTileEntryValue, "black"));
+        DrawColorMap();
+      },
+      "Add Fitness Level",
+      "fitness_tile_entry_button"
+      );
+
+    // Button for entering new color (hex)
+    setColorHexTA = UI::TextArea(
+      [this](const std::string &s)
+      {
+        // Ensure hex has correct size and starts with #
+        if (s.size() != 7 || s[0] != '#')
+        {
+          setColorHexButton.SetDisabled();
+          setColorHexTA.SetCSS("border", "1px solid red");
+          return;
+        }
+        for (int i = 1; i < 7; ++i)
+        {
+          if ( !(s[i] >= 'A' && s[i] <= 'F') && !(s[i] >= '0' && s[i] <= '9') )
+          {
+            setColorHexButton.SetDisabled();
+            setColorHexTA.SetCSS("border", "1px solid red");
+            return;
+          }
+        }
+        setColorHexButton.SetDisabled(false);
+        setColorHexTA.SetCSS("border", "1px solid black");
+        colorHexValue = s;
+      },
+      "color_entry_text_area"
+      );
+    setColorHexTA.SetSize(80, 20);
+    setColorHexTA.SetResizableOff();
+    setColorHexTA.SetText("#000000");
+
+    // Button for setting color from the color setting text area
+    setColorHexButton = UI::Button(
+      [this]()
+      {
+        colorMap[selectedColorFitness] = colorHexValue;
+        DrawColorMap();
+      },
+      "Change Color",
+      "color_entry_button"
+      );
+    setColorHexButton.SetDisabled();
+
+    // Button for removing color, should not be able to remove last color
+    removeColorButton = UI::Button(
+      [this]()
+      {
+        // Don't remove last color
+        if (colorMap.size() == 1)
+          return;
+
+        // Change all instances of fitness being removed to 0
+        for (int i = 0; i < pop.xlim; ++i)
+        {
+          for (int j = 0; j < pop.ylim; ++j)
+          {
+            if (pop.fitness_map[j][i] == selectedColorFitness)
+            {
+              pop.fitness_map[j][i] = 0;
+            }
+          }
+        }
+
+        // Remove color (can't delete 0/"black", as it is default and will be added back)
+        colorMap.erase(selectedColorFitness);
+
+        // If 0 isn't in color map, add it as black default
+        if (colorMap.count(0) == 0)
+        {
+          colorMap[0] = "black";
+        }
+
+        DrawColorMap();
+      },
+      "Remove Color",
+      "remove_color_button"
+      );
+    removeColorButton.SetDisabled();
 
     // Text box for setting population
     popEntryTA = UI::TextArea(
@@ -413,6 +484,7 @@ public:
     localLayout.GetCell(1, 1) << colorMapLayout;
     colorMapLayout.CellsCSS("border", "1px solid black");
     colorMapLayout.CellsCSS("padding", "5px");
+    localLayout.GetCell(1, 1).SetCSS("vertical-align", "top");
 
     // Editor label
     localLayout.GetCell(0, 2) << "Simulation Editor";
@@ -538,6 +610,10 @@ public:
           {
             colorSelected = -1;
             selectedColorFitness = -1;
+
+            // Disable editing features
+            setColorHexButton.SetDisabled();
+            removeColorButton.SetDisabled();
             return;
           }
 
@@ -547,6 +623,11 @@ public:
           colorMapTiles[i].Rect(0, 0, 40, 40, "red", "black");
           colorMapTiles[i].Rect(3, 3, 34, 34, c.second, "black");
           selectedColorFitness = c.first;
+
+          // Enable editing options
+          setColorHexButton.SetDisabled(false);
+          if (colorMap.size() > 1)
+            removeColorButton.SetDisabled(false);
         }
         );
       colorMapLayout.GetCell(i, 0) << colorMapTiles[i];
@@ -727,8 +808,10 @@ public:
     {
       localLayout.GetCell(1, 2)
         << "Existing Maps: " << fitnessMapSelector << fitnessMapButton << "<br>"
-        << "Fitness Value: " << fitnessEntryTA << fitnessEntryButton << fitnessClearButton << "<br>"
         << "Map Dimension: " << fitnessSizeEntryTA << fitnessSizeEntryButton << "<br>"
+        << "Add new fitness level: " << fitnessTileEntryTA << fitnessTileEntryButton << "<br>"
+        << "Change color: " << setColorHexTA << setColorHexButton << "<br>"
+        << "Remove color: " << removeColorButton << "<br>"
         << "<br><br>"
         << "Save/Load Settings: " << saveButton << loadButton;
     }
