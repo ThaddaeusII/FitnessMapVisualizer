@@ -35,7 +35,13 @@ private:
   bool drawingOn = false; // Bool for if currently able to draw the fitness levels
   double selectedColorFitness; // fitness associated with current color selected, for drawing
   std::string colorHexValue; // Value of currently entered hex
- 
+  int colorFitnessValue; // Value of fitness being assigned to a color
+  bool colorHexValid; // Check for if the input to colorHexValue is valid
+  bool colorFitnessValid; // Check for if the input to colorHexValue is valid
+  std::string selectionMethod = "r"; // Selection method parameter: "r" = roulette, "t" = tournament
+  int tournamentSize = 7; // Tournament size
+  int tournamentSizeEntry; // Tournament size in the entry area, used to update tournamentSize
+
   // Modes that the simulator can be in, Simulation, Population Editor, and Fitness Editor
   enum GraphMode
   {
@@ -83,6 +89,10 @@ private:
   // Editor settings
   UI::Button saveButton; // Save file
   UI::Button loadButton; // Load file
+  UI::Button distributePopulationButton; // Button for uniformly distributing population among selected tiles
+  UI::Button clearSelectedButton; // Clears selected population
+  UI::Selector selectionMethodSelector; // Options for selection method
+  UI::Button selectionMethodButton; // Button to set selection method
   UI::Selector fitnessMapSelector; // Selector for loading existing fitness maps
   UI::Button fitnessMapButton; // Sets the file based on selector
   UI::TextArea fitnessSizeEntryTA; // Where to set new values for fitness landscape size
@@ -91,13 +101,18 @@ private:
   UI::Button fitnessTileEntryButton; // Enter to add new fitness level to color map
   UI::TextArea setColorHexTA; // Entry area for changing color map colors
   UI::Button setColorHexButton; // Button for setting color from setColorHexTA
+  UI::TextArea setColorFitnessTA; // Entry area for changing color fitness value
+  UI::Button setColorFitnessButton; // Button for setting fitness from setColorFitnessTA
   UI::Button removeColorButton; // Button for removing a color
   UI::TextArea popEntryTA; // Textbox for updating population size
   UI::Button popEntryButton; // Enter to set value from popEntryTA
   UI::TextArea mutEntryTA; // Textbox for updating mutation rate
   UI::Button mutEntryButton; // Enter to set value from mutEntryTA
+  UI::TextArea tournamentSizeTA; // Text area for entering tournament size
+  UI::Button tournamentSizeButton; // Button for setting tournament size from tournamentSizeTA
   UI::Text fpsText; // Text to display FPS
   UI::Text genText; // Text to display current generation
+  UI::Text selectionText; // Text to display selection type
 
   // Contains population + fitness map functionality
   Population &pop; // Reference to website population
@@ -217,6 +232,122 @@ public:
       );
     loadButton.SetDisabled();
 
+    // Button for distributing population
+    distributePopulationButton = UI::Button(
+      [this]()
+      {
+        auto itr = selected.begin();
+        for (int i = 0; i < pop.n; ++i)
+        {
+          // Determine which population storage is in use
+          if (pop.first_pop)
+          {
+            pop.pop1[i].x = itr->first;
+            pop.pop1[i].y = itr->second;
+          }
+          else
+          {
+            pop.pop2[i].x = itr->first;
+            pop.pop2[i].y = itr->second;
+          }
+
+          // Cycle through selected tiles for distribution
+          itr++;
+          if (itr == selected.end())
+            itr = selected.begin();
+        }
+
+        // Clear selected and disable editor elements
+        selected.clear();
+        distributePopulationButton.SetDisabled();
+        clearSelectedButton.SetDisabled();
+
+        // Redraw when done
+        Redraw();
+      },
+      "Distribute",
+      "distribute_population_button"
+      );
+    distributePopulationButton.SetDisabled();
+
+    // Button for clearing selected tiles for distribution
+    clearSelectedButton = UI::Button(
+      [this]()
+      {
+        selected.clear();
+        distributePopulationButton.SetDisabled();
+        clearSelectedButton.SetDisabled();
+        Redraw();
+      },
+      "Clear",
+      "clear_selected_button"
+      );
+    clearSelectedButton.SetDisabled();
+
+    // Selector for selection method
+    selectionMethodSelector = UI::Selector("selection_method_selector");
+    selectionMethodSelector.SetOption("Roulette");
+    selectionMethodSelector.SetOption("Tournament");
+
+    // Used to set option from selectionMethodSelector
+    selectionMethodButton = UI::Button(
+      [this]()
+      {
+        selectionText.Clear();
+        int id = selectionMethodSelector.GetSelectID();
+        switch(id)
+        {
+        case 0:
+          selectionMethod = 'r';
+          selectionText << "Roulette" << "<br>";
+          break;
+        case 1:
+          selectionMethod = 't';
+          selectionText << "Tournament (" << tournamentSize << ")" << "<br>";
+          break;
+        default:
+          selectionMethod = 'r';
+          selectionText << "Roulette" << "<br>";
+          break;
+        }
+      },
+      "Select",
+      "selection_method_button"
+      );
+
+    // Text area for entering tournament size
+    tournamentSizeTA = UI::TextArea(
+      [this](const std::string& s)
+      {
+        char* end;
+        tournamentSizeEntry = strtol(s.c_str(), &end, 10);
+        if (end == s.c_str() || *end != '\0' || tournamentSizeEntry < 1 || tournamentSizeEntry > pop.n)
+        {
+          tournamentSizeButton.SetDisabled();
+          tournamentSizeTA.SetBorder("1px solid red");
+          return;
+        }
+        tournamentSizeButton.SetDisabled(false);
+        tournamentSizeTA.SetBorder("1px solid black");
+      },
+      "tournement_entry_area"
+      );
+    tournamentSizeTA.SetSize(80, 20);
+    tournamentSizeTA.SetResizableOff();
+    tournamentSizeTA.SetText(std::to_string(tournamentSize));
+
+    // Button for setting tournament size
+    tournamentSizeButton = UI::Button(
+      [this]()
+      {
+        // Update tournament size and the display
+        tournamentSize = tournamentSizeEntry;
+        doc.Text("selection").Redraw();
+      },
+      "Set Size",
+      "tournement_entry_button"
+      );
+
     // Selector for fitness map selection (pre-existing)
     fitnessMapSelector = UI::Selector("fitness_map_selector");
     fitnessMapSelector.SetOption("File 1");
@@ -224,33 +355,34 @@ public:
     fitnessMapSelector.SetOption("File 3");
     fitnessMapSelector.SetOption("File 4");
 
+    // Used to set option from fitnessMapSelector
     fitnessMapButton = UI::Button(
-        [this]()
+      [this]()
+      {
+        int id = fitnessMapSelector.GetSelectID();
+        switch(id)
         {
-          int id = fitnessMapSelector.GetSelectID();
-          switch(id)
-          {
-          case 0:
-            pop.loadFitnessFunction(file1);
-            break;
-          case 1:
-            pop.loadFitnessFunction(file2);
-            break;
-          case 2:
-            pop.loadFitnessFunction(file3);
-            break;
-          case 3:
-            pop.loadFitnessFunction(file4);
-            break;
-          default:
-            pop.loadFitnessFunction(file1);
-            break;
-          }
-          CreateColorMap();
-          Redraw();
-        },
-        "Load Map",
-        "fitness_map_button"
+        case 0:
+          pop.loadFitnessFunction(file1);
+          break;
+        case 1:
+          pop.loadFitnessFunction(file2);
+          break;
+        case 2:
+          pop.loadFitnessFunction(file3);
+          break;
+        case 3:
+          pop.loadFitnessFunction(file4);
+          break;
+        default:
+          pop.loadFitnessFunction(file1);
+          break;
+        }
+        CreateColorMap();
+        Redraw();
+      },
+      "Load Map",
+      "fitness_map_button"
       );
 
     // Text box for entering the size of the fitness map
@@ -330,19 +462,27 @@ public:
         if (s.size() != 7 || s[0] != '#')
         {
           setColorHexButton.SetDisabled();
+          colorHexValue = false;
           setColorHexTA.SetCSS("border", "1px solid red");
           return;
         }
+
+        // Ensure all characters are 0-9,A-F
         for (int i = 1; i < 7; ++i)
         {
           if ( !(s[i] >= 'A' && s[i] <= 'F') && !(s[i] >= '0' && s[i] <= '9') )
           {
             setColorHexButton.SetDisabled();
+            colorHexValue = false;
             setColorHexTA.SetCSS("border", "1px solid red");
             return;
           }
         }
-        setColorHexButton.SetDisabled(false);
+        // Enable if value is valid and there is a selected color to change
+        colorHexValid = true;
+        if (colorSelected != -1)
+          setColorHexButton.SetDisabled(false);
+
         setColorHexTA.SetCSS("border", "1px solid black");
         colorHexValue = s;
       },
@@ -350,20 +490,71 @@ public:
       );
     setColorHexTA.SetSize(80, 20);
     setColorHexTA.SetResizableOff();
-    setColorHexTA.SetText("#000000");
+    setColorHexTA.SetText("#______");
 
     // Button for setting color from the color setting text area
     setColorHexButton = UI::Button(
       [this]()
       {
         colorMap[selectedColorFitness] = colorHexValue;
+        colorSelected = -1;
+        selectedColorFitness = -1;
         DrawColorMap();
+        Redraw();
       },
       "Change Color",
       "color_entry_button"
       );
     setColorHexButton.SetDisabled();
 
+    // Button for changing fitness of a color
+    setColorFitnessTA = UI::TextArea(
+      [this](const std::string &s)
+      {
+        char *end;
+        colorFitnessValue = strtol(s.c_str(), &end, 10);
+        if (end == s.c_str() || *end != '\0' || colorFitnessValue < 0 || colorMap.count(colorFitnessValue) > 0)
+        {
+          setColorFitnessButton.SetDisabled();
+          setColorFitnessTA.SetBorder("1px solid red");
+          return;
+        }
+        
+        // Enable if value is valid and there is a selected color to change
+        colorFitnessValid = true;
+        if (colorSelected != -1)
+          setColorFitnessButton.SetDisabled(false);
+
+        setColorFitnessTA.SetCSS("border", "1px solid black");
+      },
+      "color_fitness_entry_text_area"
+      );
+    setColorFitnessTA.SetSize(80, 20);
+    setColorFitnessTA.SetResizableOff();
+
+    // Button for setting color from the color setting text area
+    setColorFitnessButton = UI::Button(
+      [this]()
+      {
+        // Set all instances of selected color to colorFitnessValue
+        for (int i = 0; i < pop.xlim; ++i)
+          for (int j = 0; j < pop.ylim; ++j)
+            if (pop.fitness_map[j][i] == selectedColorFitness)
+              pop.fitness_map[j][i] = colorFitnessValue;
+        
+        // Swap color map entry to use new fitness value for the color
+        colorMap[colorFitnessValue] = colorMap[selectedColorFitness];
+        colorMap.erase(selectedColorFitness);
+
+        colorSelected = -1;
+        selectedColorFitness = -1;
+        DrawColorMap();
+      },
+      "Change fitness",
+      "color_fitness_entry_button"
+      );
+    setColorFitnessButton.SetDisabled();
+    
     // Button for removing color, should not be able to remove last color
     removeColorButton = UI::Button(
       [this]()
@@ -393,7 +584,10 @@ public:
           colorMap[0] = "black";
         }
 
+        colorSelected = -1;
+        selectedColorFitness = -1;
         DrawColorMap();
+        Redraw();
       },
       "Remove Color",
       "remove_color_button"
@@ -465,6 +659,8 @@ public:
     fpsText << " FPS = " << UI::Live( [this](){return 1000.0 / GetStepTime();} );
     genText = UI::Text("gen");
     genText << " Gen = " << UI::Live( [this](){return pop.gen;} );
+    selectionText = UI::Text("selection");
+    selectionText << "Selection = " << UI::Live( [this](){return tournamentSize;} );
 
     // Set layout
     layout.GetCell(0, 0) << localLayout;
@@ -494,7 +690,7 @@ public:
 
     // Simulation options
     localLayout.GetCell(2, 0) << startButton << resetButton << speedButton
-      << fpsText << genText;
+      << selectionText << "<br>" << fpsText << genText;
 
     // Set mode to simulation
     ModeSwap();
@@ -522,10 +718,10 @@ public:
     // Update the population
     timeSinceLastEvolve += GetStepTime();
     if (fast)
-      pop.evolve(1, 'r');
+      pop.evolve(1, selectionText, tournamentSize);
     else if (timeSinceLastEvolve >= 1000)
     {
-      pop.evolve(1);
+      pop.evolve(1, selectionText, tournamentSize);
       timeSinceLastEvolve = 0.0;
     }
 
@@ -578,7 +774,7 @@ public:
   {
     // Clear the color map table and resize as needed
     colorMapLayout.ClearCells();
-    colorMapLayout.Resize(colorMap.size(), 2);
+    colorMapLayout.Resize((colorMap.size() < 10) ? colorMap.size() % 10 : 10, (colorMap.size() / 10 + 1) * 2);
     colorMapLayout.CellsCSS("border", "1px solid black");
     colorMapLayout.CellsCSS("padding", "5px");
 
@@ -590,20 +786,19 @@ public:
     int i = 0;
     for (auto &c : colorMap)
     {
-      colorMapTiles[i].Rect(0, 0, 40, 40, c.second, "black");
+      colorMapTiles[i].Clear();
+      if (colorSelected != i)
+        colorMapTiles[i].Rect(0, 0, 40, 40, c.second, "black");
+      else
+      {
+        colorMapTiles[i].Rect(0, 0, 40, 40, "red", "black");
+        colorMapTiles[i].Rect(3, 3, 34, 34, c.second, "black");
+      }
       colorMapTiles[i].OnMouseDown(
         [this, c, i](int x, int y)
         {
           if (mode != FIT)
             return;
-
-          // If another color was selected, reset it
-          if (colorSelected != -1)
-          {
-            auto it = colorMap.begin();
-            std::advance(it, colorSelected);
-            colorMapTiles[colorSelected].Rect(0, 0, 40, 40, it->second, "black");
-          }
 
           // If this color was selected already, reset
           if (colorSelected == i)
@@ -613,25 +808,30 @@ public:
 
             // Disable editing features
             setColorHexButton.SetDisabled();
+            setColorFitnessButton.SetDisabled();
             removeColorButton.SetDisabled();
+
+            DrawColorMap();
             return;
           }
 
           // Otherwise, highlight border
           colorSelected = i;
-          colorMapTiles[i].Clear();
-          colorMapTiles[i].Rect(0, 0, 40, 40, "red", "black");
-          colorMapTiles[i].Rect(3, 3, 34, 34, c.second, "black");
           selectedColorFitness = c.first;
 
           // Enable editing options
-          setColorHexButton.SetDisabled(false);
+          if (colorHexValid)
+            setColorHexButton.SetDisabled(false);
+          if (colorFitnessValid)
+            setColorFitnessButton.SetDisabled(false);
           if (colorMap.size() > 1)
             removeColorButton.SetDisabled(false);
+
+          DrawColorMap();
         }
         );
-      colorMapLayout.GetCell(i, 0) << colorMapTiles[i];
-      colorMapLayout.GetCell(i, 1) << c.first;
+      colorMapLayout.GetCell(i % 10, (i / 10) * 2) << colorMapTiles[i];
+      colorMapLayout.GetCell(i % 10, (i / 10) * 2 + 1) << c.first;
       i++;
     }
   }
@@ -694,6 +894,19 @@ public:
         }
       }
 
+      // Check whether to enable or disable editing tools
+      if (selected.size() == 0)
+      {
+        distributePopulationButton.SetDisabled();
+        clearSelectedButton.SetDisabled();
+      }
+      else
+      {
+        distributePopulationButton.SetDisabled(false);
+        clearSelectedButton.SetDisabled(false);
+      }
+
+      // Redraw with tiles selected highlighted
       Redraw();
     }
     else if (mode == FIT)
@@ -793,12 +1006,22 @@ public:
     resetButton.SetDisabled(!sim);
     speedButton.SetDisabled(!sim);
 
+    // Simulation editor elements
+    if (sim)
+    {
+      localLayout.GetCell(1, 2)
+        << selectionMethodSelector << selectionMethodButton
+        << "<br>" << "Tournament size: " << tournamentSizeTA << tournamentSizeButton;
+    }
+
     // Population editor elements
     if (pop)
     {
       localLayout.GetCell(1, 2)
         << "Population: " << popEntryTA << popEntryButton << "<br>"
         << "Mutation rate: " << mutEntryTA << mutEntryButton << "<br>"
+        << "Distrubte population: " << distributePopulationButton << "<br>"
+        << "Clear selected: " << clearSelectedButton << "<br>"
         << "<br><br>"
         << "Save/Load Settings: " << saveButton << loadButton;
     }
@@ -811,6 +1034,7 @@ public:
         << "Map Dimension: " << fitnessSizeEntryTA << fitnessSizeEntryButton << "<br>"
         << "Add new fitness level: " << fitnessTileEntryTA << fitnessTileEntryButton << "<br>"
         << "Change color: " << setColorHexTA << setColorHexButton << "<br>"
+        << "Change fitness: " << setColorFitnessTA << setColorFitnessButton << "<br>"
         << "Remove color: " << removeColorButton << "<br>"
         << "<br><br>"
         << "Save/Load Settings: " << saveButton << loadButton;

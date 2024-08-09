@@ -25,8 +25,8 @@ web:
 		-I ../Empirical/include/ \
 		--js-library ../Empirical/include/emp/web/library_emp.js \
 		-s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'allocate']" \
-		-s TOTAL_MEMORY=1024mb \
-		-s TOTAL_STACK=512mb \
+		-s TOTAL_MEMORY=32mb \
+		-s TOTAL_STACK=64kb \
 		-s EXPORTED_FUNCTIONS="['_main', '_empCppCallback']" \
 		-s NO_EXIT_RUNTIME=1 \
 		-o ./Web/website.js \
