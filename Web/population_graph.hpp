@@ -193,7 +193,7 @@ public:
     resetButton = UI::Button(
       [this]()
       {
-        pop.reset(6, 5); // Change this so starting pos can be changed
+        pop.reset();
         Redraw();
       },
       "Reset",
@@ -256,6 +256,9 @@ public:
           if (itr == selected.end())
             itr = selected.begin();
         }
+
+        // Save initial population so reset brings it here
+        pop.newInitPop();
 
         // Clear selected and disable editor elements
         selected.clear();

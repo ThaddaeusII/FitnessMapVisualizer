@@ -83,13 +83,6 @@ Population::Population(int n, double m, int xstart, int ystart) : n(n), m(m)
     for (int j = 0; j < MAX_GENE_SIZE; ++j)
       fitness_map[i][j] = 0;
 
-
-  // Adjust xstart and ystart if necessary
-  if (xstart == -1)
-    xstart = xlim / 2;
-  if (ystart == -1)
-    ystart = ylim / 2;
-  
   // Initialize population at center of current genetic map
   first_pop = true;
   for (int i = 0; i < n; ++i)
@@ -161,20 +154,45 @@ void Population::evolve(int generations, char selection, int tournament_size, bo
 }
 
 /*
+ * Function to set a new initial population start (saves current population)
+ * Arguments: None
+ * Returns: None
+ */
+void Population::newInitPop()
+{
+  if (first_pop)
+  {
+    for (int i = 0; i < n; ++i)
+    {
+      init_pop[i].x = pop1[i].x;
+      init_pop[i].y = pop1[i].y;
+    }
+  }
+  else
+  {
+    for (int i = 0; i < n; ++i)
+    {
+      init_pop[i].x = pop2[i].x;
+      init_pop[i].y = pop2[i].y;
+    }
+  }
+}
+
+/*
  * Function to reset a population
  * Arguments: None
  * Returns: Nothing
  */
-void Population::reset(int x, int y)
+void Population::reset()
 {
   gen = 0;
   for (int i = 0; i < n; ++i)
   {
-    pop1[i].x = x;
-    pop1[i].y = y;
+    pop1[i].x = init_pop[i].x;
+    pop1[i].y = init_pop[i].y;
     pop1[i].getFitness(fitness_map);
-    pop2[i].x = x;
-    pop2[i].y = y;
+    pop2[i].x = init_pop[i].x;
+    pop2[i].y = init_pop[i].y;
     pop2[i].getFitness(fitness_map);
   }
 }

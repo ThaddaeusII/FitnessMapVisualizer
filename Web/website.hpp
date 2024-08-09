@@ -23,7 +23,7 @@ public:
   // Website constructor
   Website() :
     csize(500.0),
-    pop(10000, 0.1, 6, 5),
+    pop(10000, 0.1),
     doc("emp_base"),
     layout(2, 2, "layout"),
     pg(csize, doc, pop, layout),

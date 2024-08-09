@@ -39,6 +39,7 @@ struct Population
   
   // Organism and fitness value storage
   bool first_pop; // Using pop1 if true, else pop2 is current
+  emp::array<Organism, MAX_POP_SIZE> init_pop; // Initial population, used for resetting
   emp::array<Organism, MAX_POP_SIZE> pop1;
   emp::array<Organism, MAX_POP_SIZE> pop2;
   emp::array<emp::array<double, MAX_GENE_SIZE>, MAX_GENE_SIZE> fitness_map;
@@ -56,7 +57,8 @@ struct Population
               int tournament_size = 7,
               bool save_all = false,
               std::string save_dir = "./TestData");
-  void reset(int x = 0, int y = 0);
+  void newInitPop();
+  void reset();
   
   // Parent selection methods
   void selectionTournament(int t);
